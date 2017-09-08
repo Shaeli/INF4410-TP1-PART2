@@ -62,18 +62,7 @@ public class Client {
             }catch (Exception e) 
             {
             	System.err.println("Erreur: " + e.getMessage());
-        	 }
-            	//finally 
-         //    {
-         //        //writ.close();
-         //    }
-
-
-
-
-
-
-
+        	}
 		}
 		else 	
 		{
@@ -142,7 +131,6 @@ public class Client {
 			}
 		}
 		
-
 	}
 
 	private void list()

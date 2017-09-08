@@ -8,11 +8,13 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.io.*;
 
+ 
 import ca.polymtl.inf4410.tp1.shared.ServerInterface;
 
 public class Server implements ServerInterface {
 
 	private int nb_client=0;
+	HashMap<String, String> hashm = new HashMap<String, String>();
 
 	public static void main(String[] args) {
 		Server server = new Server();
@@ -29,8 +31,7 @@ public class Server implements ServerInterface {
 		}
 		
 		try {
-			ServerInterface stub = (ServerInterface) UnicastRemoteObject
-					.exportObject(this, 0);
+			ServerInterface stub = (ServerInterface) UnicastRemoteObject.exportObject(this, 0);
 
 			Registry registry = LocateRegistry.getRegistry();
 			registry.rebind("server", stub);
@@ -54,7 +55,7 @@ public class Server implements ServerInterface {
 			{
 				new_file.createNewFile();
 				chain=file_name+" ajouté"; 
-				
+				hashm.put(file_name,"unlock");
 			}catch(IOException e)
 			{	
 				System.err.println();
@@ -73,24 +74,28 @@ public class Server implements ServerInterface {
 
 	public String list() throws RemoteException
 	{
-
-		File path = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/");
-		String ls[] = path.list();
 		String result = "";
-		if (ls.length != 0 )
+		if (hashm.isEmpty())
 		{
+			return "aucun fichier\n";
 
-			for(String fich : ls)
-			{
-				result = result + "\n" + fich;
-			}
 		}
 		else
 		{
-			result="0 fichiers.";
-		
+			Set set = hashm.entrySet();
+	      	Iterator it = set.iterator();
+	      	while(it.hasNext()) 
+	      	{
+	        	Map.Entry entry = (Map.Entry)it.next();
+	        	result = result + "\n" + entry.getKey();
+
+	        // System.out.println(entry.getValue());
+	      	}
+	      	
+	      	result=result+"\n";
+	      	return result;
 		}
-		return result;
+	
 	}
 
 
