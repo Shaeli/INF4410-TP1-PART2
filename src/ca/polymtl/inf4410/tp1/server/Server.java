@@ -5,6 +5,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.*;
+import java.io.*;
 
 import ca.polymtl.inf4410.tp1.shared.ServerInterface;
 
@@ -44,5 +46,28 @@ public class Server implements ServerInterface {
 	// public int execute(int a, int b) throws RemoteException {
 	// 	return a + b;
 	// }
+
+	@Override
+	public String create(String file_name) throws RemoteException
+	{
+
+		File new_file = new File(file_name);
+		String chain;
+		try 
+		{
+			new_file.createNewFile();
+				chain="fichier crée";
+			
+		}catch(IOException e)
+		{	
+			System.err.println();
+			System.err.println("Erreur: " + e.getMessage());
+			chain="la creation du fichier a echoue";
+		}
+		System.out.println(chain);
+		return chain;
+	}
+
+
 	
 }

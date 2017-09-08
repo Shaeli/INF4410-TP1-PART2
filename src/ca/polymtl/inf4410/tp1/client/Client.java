@@ -10,18 +10,22 @@ import ca.polymtl.inf4410.tp1.shared.ServerInterface;
 
 public class Client {
 	public static void main(String[] args) {
-		String distantHostname = null;
+		String Hostname = null;
 
 		if (args.length > 0) {
-			distantHostname = args[0];
+			Hostname = args[0];
+		}
+		else
+		{
+			Hostname="127.0.0.1";
 		}
 
-		Client client = new Client(distantHostname);
+		Client client = new Client(Hostname);
 		client.run();
 	}
 
 	
-	private ServerInterface distantServerStub = null;
+	private ServerInterface ServerStub = null;
 
 	public Client(String distantServerHostname) {
 		super();
@@ -30,18 +34,18 @@ public class Client {
 			System.setSecurityManager(new SecurityManager());
 		}
 
-
-		if (distantServerHostname != null) {
-			distantServerStub = loadServerStub(distantServerHostname);
-		}
+			ServerStub = loadServerStub(distantServerHostname);
 
 	}
 
 	private void run() {
-
-		if (distantServerStub != null) {
-			appelRMIDistant();
+		try{
+		String result = ServerStub.create("aa");
+		System.out.println(result);
+		} catch (RemoteException e) {
+			System.out.println("Erreur: " + e.getMessage());
 		}
+
 	}
 
 	private ServerInterface loadServerStub(String hostname) {
@@ -62,15 +66,7 @@ public class Client {
 		return stub;
 	}
 
-	// private void appelRMIDistant() {
-	// 	try{
-	// 	int result = distantServerStub.execute(4, 7);
-	// 	System.out.println("Résultat appel normal: " + result);
-	// 	} catch (RemoteException e) {
-	// 		System.out.println("Erreur: " + e.getMessage());
-	// 	}
-		
-	// }
+
 
 
 
