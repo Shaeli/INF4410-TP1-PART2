@@ -9,8 +9,8 @@ PART 1 :
 
 PART 2:   
 [ ] generateclientid()    
-[ ] create(nom)   
-[ ] list()  
+[X] create(nom)   
+[X] list()  
 [ ] syncLocalDir()    
 [ ] get(nom, checksum)    
 [ ] lock(nom, clientid, checksum)    
