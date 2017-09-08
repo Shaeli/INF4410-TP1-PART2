@@ -8,7 +8,7 @@ PART 1 :
 [ ]Question 2   
 
 PART 2:   
-[ ] generateclientid()    
+[X] generateclientid()    
 [X] create(nom)   
 [X] list()  
 [ ] syncLocalDir()    
