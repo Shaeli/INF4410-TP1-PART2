@@ -5,6 +5,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.*;
 
 import ca.polymtl.inf4410.tp1.shared.ServerInterface;
 
@@ -39,13 +40,22 @@ public class Client {
 	}
 
 	private void run() {
-		try{
-		String result = ServerStub.create("aa");
-		System.out.println(result);
-		} catch (RemoteException e) {
-			System.out.println("Erreur: " + e.getMessage());
-		}
 
+		Scanner sc = new Scanner(System.in);
+		String keyboard;
+		do
+		{
+			keyboard = sc.nextLine();
+		switch(keyboard) {
+  			 case "create" :
+  			 	create("blabla");
+     		 	break; 
+ 
+   			default : 
+   				break;
+  
+		}
+		}while(!keyboard.equals("exit"));
 	}
 
 	private ServerInterface loadServerStub(String hostname) {
@@ -66,7 +76,19 @@ public class Client {
 		return stub;
 	}
 
+	private void create(String name)
+	{
+		try
+		{
+			String result = ServerStub.create(name);
+			System.out.println(result);
+		} 
+		catch (RemoteException e) 
+		{
+			System.out.println("Erreur: " + e.getMessage());
+		}
 
+	}
 
 
 
