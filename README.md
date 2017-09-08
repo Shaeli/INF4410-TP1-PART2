@@ -9,7 +9,7 @@ PART 1 :
 
 PART 2:   
 [X] generateclientid()    
-[X] create(nom)   
+[X] create(nom) note a moi même : cheack si pas dans la hashmap plutot que dans le dossier a faire  
 [X] list()  
 [ ] syncLocalDir()    
 [ ] get(nom, checksum)    
