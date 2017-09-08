@@ -49,24 +49,55 @@ public class Server implements ServerInterface {
 	@Override
 	public String create(String file_name) throws RemoteException
 	{
-
-		File new_file = new File(file_name);
+		File new_file = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name);
 		String chain;
-		try 
+		if (!new_file.exists())
 		{
-			new_file.createNewFile();
+			try 
+			{
+				new_file.createNewFile();
 				chain="fichier crée";
-			
-		}catch(IOException e)
-		{	
-			System.err.println();
-			System.err.println("Erreur: " + e.getMessage());
-			chain="la creation du fichier a echoue";
+				
+			}catch(IOException e)
+			{	
+				System.err.println();
+				System.err.println("Erreur: " + e.getMessage());
+				chain="la creation du fichier a echoue";
+			}
 		}
+		else
+		{
+			chain="Le fichier existe deja";
+		}
+		
 		System.out.println(chain);
 		return chain;
 	}
 
+	@Override
+	public String list() throws RemoteException
+	{
+
+		File path = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/");
+		String ls[] = path.list();
+		String result = "";
+		if (ls.length != 0 )
+		{
+
+			for(String fich : ls)
+			{
+				result = result + "\n" + fich;
+			}
+		}
+		else
+		{
+			result="0 fichiers.";
+		
+		}
+		return result;
+		
+
+	}
 
 	
 }

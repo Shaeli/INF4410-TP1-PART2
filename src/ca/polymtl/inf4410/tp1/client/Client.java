@@ -42,25 +42,25 @@ public class Client {
 	private void run() {
 
 		Scanner sc = new Scanner(System.in);
-		String keyboard;
-		do
+		String entry[];
+
+		entry = sc.nextLine().split(" ");
+		switch(entry[0]) 
 		{
-			keyboard = sc.nextLine();
-		switch(keyboard) {
-  			 case "create" :
-  			 	create("blabla");
+  			case "create" :
+  			 	create(entry[1]);
      		 	break; 
- 
+     		case "list" :
+     		 	list();
    			default : 
+   				System.out.println("Commande non reconnue");
    				break;
   
 		}
-		}while(!keyboard.equals("exit"));
 	}
 
 	private ServerInterface loadServerStub(String hostname) {
 		ServerInterface stub = null;
-
 		try {
 			Registry registry = LocateRegistry.getRegistry(hostname);
 			stub = (ServerInterface) registry.lookup("server");
@@ -90,6 +90,18 @@ public class Client {
 
 	}
 
+	private void list()
+	{
+		try
+		{
+			String result = ServerStub.list();
+			System.out.println(result);
+		} 
+		catch (RemoteException e) 
+		{
+			System.out.println("Erreur: " + e.getMessage());
+		}
+	}
 
 
 }
