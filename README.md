@@ -7,10 +7,10 @@ PART 1 :
 []Question 2 
 
 PART 2: 
-[] generateclientid()  
-[] create(nom) 
-[] list() 
-[] syncLocalDir() 
-[] get(nom, checksum)  
-[] lock(nom, clientid, checksum)  
-[] push(nom, contenu, clientid)  
+[] generateclientid()    
+[] create(nom)   
+[] list()  
+[] syncLocalDir()    
+[] get(nom, checksum)    
+[] lock(nom, clientid, checksum)    
+[] push(nom, contenu, clientid)    
