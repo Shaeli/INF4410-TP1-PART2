@@ -12,6 +12,8 @@ import ca.polymtl.inf4410.tp1.shared.ServerInterface;
 
 public class Server implements ServerInterface {
 
+	private int nb_client=0;
+
 	public static void main(String[] args) {
 		Server server = new Server();
 		server.run();
@@ -41,12 +43,7 @@ public class Server implements ServerInterface {
 			System.err.println("Erreur: " + e.getMessage());
 		}
 	}
-	// @Override
-	// public int execute(int a, int b) throws RemoteException {
-	// 	return a + b;
-	// }
 
-	@Override
 	public String create(String file_name) throws RemoteException
 	{
 		File new_file = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name);
@@ -56,7 +53,7 @@ public class Server implements ServerInterface {
 			try 
 			{
 				new_file.createNewFile();
-				chain="fichier crée";
+				chain=file_name+" ajouté"; 
 				
 			}catch(IOException e)
 			{	
@@ -67,14 +64,13 @@ public class Server implements ServerInterface {
 		}
 		else
 		{
-			chain="Le fichier existe deja";
+			chain="Erreure le fichier existe deja";
 		}
 		
 		System.out.println(chain);
 		return chain;
 	}
 
-	@Override
 	public String list() throws RemoteException
 	{
 
@@ -95,9 +91,13 @@ public class Server implements ServerInterface {
 		
 		}
 		return result;
-		
-
 	}
 
+
+
+	public int generateclientid() throws RemoteException
+	{
+		return ++nb_client;
+	}
 	
 }
