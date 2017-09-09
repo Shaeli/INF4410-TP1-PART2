@@ -7,8 +7,10 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
- 
+
 import ca.polymtl.inf4410.tp1.shared.ServerInterface;
 
 public class Server implements ServerInterface {
@@ -29,7 +31,7 @@ public class Server implements ServerInterface {
 		if (System.getSecurityManager() == null) {
 			System.setSecurityManager(new SecurityManager());
 		}
-		
+
 		try {
 			ServerInterface stub = (ServerInterface) UnicastRemoteObject.exportObject(this, 0);
 
@@ -51,13 +53,13 @@ public class Server implements ServerInterface {
 		String chain;
 		if (!new_file.exists())
 		{
-			try 
+			try
 			{
 				new_file.createNewFile();
-				chain=file_name+" ajouté"; 
+				chain=file_name+" ajouté";
 				hashm.put(file_name,"unlock");
 			}catch(IOException e)
-			{	
+			{
 				System.err.println();
 				System.err.println("Erreur: " + e.getMessage());
 				chain="la creation du fichier a echoue";
@@ -67,7 +69,7 @@ public class Server implements ServerInterface {
 		{
 			chain="Erreure le fichier existe deja";
 		}
-		
+
 		System.out.println(chain);
 		return chain;
 	}
@@ -84,25 +86,41 @@ public class Server implements ServerInterface {
 		{
 			Set set = hashm.entrySet();
 	      	Iterator it = set.iterator();
-	      	while(it.hasNext()) 
+	      	while(it.hasNext())
 	      	{
 	        	Map.Entry entry = (Map.Entry)it.next();
 	        	result = result + "\n" + entry.getKey();
 
 	        // System.out.println(entry.getValue());
 	      	}
-	      	
+
 	      	result=result+"\n";
 	      	return result;
 		}
-	
+
 	}
-
-
 
 	public int generateclientid() throws RemoteException
 	{
 		return ++nb_client;
 	}
-	
+
+  public HashMap<String, String> syncLocalDir() throws RemoteException {
+    HashMap<String, String> files = new HashMap<String, String>();
+    for (String file_name : hashm.keySet()) {
+      files.put(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + file_name));
+    }
+    return files;
+  }
+
+  private String FileToString(String filePath) {
+    String result = "";
+    try {
+        result = new String (Files.readAllBytes(Paths.get(filePath)));
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    return result;
+  }
+
 }

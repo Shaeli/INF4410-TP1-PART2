@@ -36,13 +36,13 @@ public class Client {
 		}
 	}
 
-	
+
 	private ServerInterface ServerStub = null;
 
 	public Client(String Hostame) {
 		super();
 
-		if (System.getSecurityManager() == null) 
+		if (System.getSecurityManager() == null)
 		{
 			System.setSecurityManager(new SecurityManager());
 		}
@@ -50,21 +50,21 @@ public class Client {
 		ServerStub = loadServerStub(Hostame);
 		File id_cli = new File("id.txt");
 		if (!id_cli.exists())
-		{	
-			
-            try 
+		{
+
+            try
             {
             	id=generateclientid();
 				id_cli.createNewFile();
 				FileWriter writer = new FileWriter(id_cli);
                 writer.write(Integer .toString(id));
                 writer.close();
-            }catch (Exception e) 
+            }catch (Exception e)
             {
             	System.err.println("Erreur: " + e.getMessage());
         	}
 		}
-		else 	
+		else
 		{
 			try
 			{
@@ -75,7 +75,7 @@ public class Client {
 			{
 				System.err.println("Erreur: " + err.getMessage());
 			}
-			
+
 		}
 
 
@@ -84,18 +84,21 @@ public class Client {
 	private void run(String commande, String fichier) {
 
 
-		switch(commande) 
+		switch(commande)
 		{
   			case "create" :
   			 	create(fichier);
-     		 	break; 
+     		 	break;
      		case "list" :
      		 	list();
      		 	break;
-   			default : 
+				case "syncLocalDir":
+					syncLocalDir();
+					break;
+   			default :
    				System.out.println("Commande non reconnue");
    				break;
-  
+
 		}
 	}
 
@@ -124,13 +127,13 @@ public class Client {
 			{
 				String result = ServerStub.create(name);
 				System.out.println(result);
-			} 
-			catch (RemoteException e) 
+			}
+			catch (RemoteException e)
 			{
 				System.out.println("Erreur: " + e.getMessage());
 			}
 		}
-		
+
 	}
 
 	private void list()
@@ -139,8 +142,8 @@ public class Client {
 		{
 			String result = ServerStub.list();
 			System.out.print(result);
-		} 
-		catch (RemoteException e) 
+		}
+		catch (RemoteException e)
 		{
 			System.out.println("Erreur: " + e.getMessage());
 		}
@@ -152,12 +155,34 @@ public class Client {
 		try
 		{
 			id=ServerStub.generateclientid();
-	
-		} 
-		catch (RemoteException e) 
+
+		}
+		catch (RemoteException e)
 		{
 			System.out.println("Erreur: " + e.getMessage());
 		}
 		return id;
+	}
+
+	private void syncLocalDir() {
+		try {
+			HashMap<String, String> files = new HashMap<String, String>();
+			files = ServerStub.syncLocalDir();
+			try {
+				for (String file_name : files.keySet()) {
+					File new_file = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
+					if (!new_file.exists()) {
+						new_file.createNewFile();
+					}
+					BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
+					file_writer.write(files.get(file_name));
+					file_writer.close();
+				}
+			} catch (IOException e) {
+			  System.out.println("Erreur: " + e.getMessage());
+			}
+		} catch (RemoteException e) {
+			System.out.println("Erreur: " + e.getMessage());
+		}
 	}
 }
