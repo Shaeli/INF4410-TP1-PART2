@@ -1,10 +1,16 @@
 package ca.polymtl.inf4410.tp1.client;
 
+import ca.polymtl.inf4410.tp1.shared.ServerInterface;
+import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.io.*;
 import java.nio.file.Files;
@@ -14,7 +20,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import ca.polymtl.inf4410.tp1.shared.ServerInterface;
 
+
+
 public class Client {
+ 	HashMap<String, Integer> checksum_list = new HashMap<String, Integer>();
 
 	private int id;
 	private ServerInterface ServerStub = null;
@@ -101,9 +110,14 @@ public class Client {
 			case "syncLocalDir":
 				syncLocalDir();
 				break;
-			case "lock" :
+			case "lock":
 				lock(fichier);
 				break;
+
+       		case "get":
+          		get(fichier);
+         		break;
+
    			default :
    				System.out.println("Commande non reconnue");
    				break;
@@ -198,52 +212,116 @@ public class Client {
 
 	}
 
+
 	private void lock (String file_name)
 	{
 		if (file_name!= null)
 		{	
-			byte[] hash=null;
 			File fichier = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
-			String content="";
-
 			if (fichier.exists()) 
 			{
 				try 
 				{
-					content= new String (Files.readAllBytes(Paths.get("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name)));
- 					MessageDigest md = MessageDigest.getInstance("SHA1");
- 					byte[] octetx = content.getBytes(); 
- 					hash = md.digest(octetx);
- 					System.out.println(hash);
- 					try{
- 						ServerStub.lock(file_name,id,hash);
- 					}catch (RemoteException e)
-					{
-						System.out.println("Erreur: " + e.getMessage());
-					}	
+ 					String response=ServerStub.lock(file_name,id,FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
+ 					if (response.equals("-1"))
+ 					{
+ 						System.out.println("Fichier deja verouillé");
 
-				}catch (IOException e) 
-    			{
-    				e.printStackTrace();
-    			}catch (NoSuchAlgorithmException e) 
-    			{
-    				e.printStackTrace();
-    			}
-			}
-			else
+ 					}else if (response.equals("no file"))
+ 					{
+						System.out.println("Le fichier n'existe pas sur le serveur");
+ 					}else if (response.equals("1"))
+ 					{
+ 						System.out.println("Fichier verouillé");
+ 					}else
+ 					{
+						try
+						{
+							BufferedWriter file_writer = new BufferedWriter(new FileWriter(fichier));
+           					file_writer.write(response);
+            				file_writer.close();
+							System.out.println("Fichier verouillé et téléchargé");
+						}catch(IOException e)
+						{
+       						 System.out.println("Erreur: " + e.getMessage());
+      					}
+ 					}
+
+
+ 				}catch (RemoteException e)
+				{
+					System.out.println("Erreur: " + e.getMessage());
+				}	
+
+			}	
+			else /*si le client ne possède pas le fichier*/
 			{
-					System.out.println("Le fichier n'existe pas localement");
+				try 
+				{
+ 					String response=ServerStub.lock(file_name,id,"-1");
+				}catch (RemoteException e)
+				{
+					System.out.println("Erreur: " + e.getMessage());
+				}	
 			}
 
-			//try
-			//{
-				//String result = ServerStub.lock(file_name,id,hash);
-				System.out.println("bjr");
-			//}
+			
 			
 		}
 
 	}
 
 
+	private void get(String file_name) {
+		try {
+        File new_file = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
+
+        if (!new_file.exists()) {
+          new_file.createNewFile();
+          String file_content_buffer = ServerStub.get(file_name, "-1");
+          BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
+          file_writer.write(file_content_buffer);
+          file_writer.close();
+        } else {
+          String file_content_buffer = ServerStub.get(file_name, FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
+          if (file_content_buffer == null) {
+            System.out.println("Error : File already up to date or missing from server...\n");
+          } else {
+            BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
+            file_writer.write(file_content_buffer);
+            file_writer.close();
+          }
+        }
+      } catch (IOException e) {
+        System.out.println("Erreur: " + e.getMessage());
+      }
+	}
+
+  private String FileToChecksum(String name) {
+		int i = 0;
+		byte [] file_content_buffer = new byte[1024];
+    StringBuffer sb = new StringBuffer("");
+    String checksum = "";
+    try {
+      MessageDigest md = MessageDigest.getInstance("SHA1");
+      FileInputStream file_reader = new FileInputStream(name);
+
+      while ((i=file_reader.read(file_content_buffer)) != -1) {
+        md.update(file_content_buffer, 0, i);
+      }
+
+      byte[] mdbytes = md.digest();
+
+      for (int k = 0; k < mdbytes.length; k++) {
+        sb.append(Integer.toString((mdbytes[k] & 0xff) + 0x100, 16).substring(1));
+      }
+    } catch (FileNotFoundException e) {
+      System.out.println("Erreur: " + e.getMessage());
+    } catch (NoSuchAlgorithmException e) {
+      System.out.println("Erreur: " + e.getMessage());
+    } catch (IOException e) {
+      System.out.println("Erreur: " + e.getMessage());
+    }
+    return checksum = sb.toString();
+	}
 }

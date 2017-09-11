@@ -1,10 +1,18 @@
 package ca.polymtl.inf4410.tp1.server;
 
+import ca.polymtl.inf4410.tp1.shared.ServerInterface;
+import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.io.*;
 import java.nio.file.Files;
@@ -68,7 +76,7 @@ public class Server implements ServerInterface {
 		}
 		else
 		{
-			chain="Erreure le fichier existe deja";
+			chain="Erreur le fichier existe deja";
 		}
 
 		System.out.println(chain);
@@ -131,7 +139,7 @@ public class Server implements ServerInterface {
     	return result;
   	}
 
-	public boolean lock(String file_name, int clientid, byte[]checksum) throws RemoteException
+	public String lock(String file_name, int clientid, String checksum) throws RemoteException
 	{
 			
 			if(hashm.containsKey(file_name))
@@ -139,34 +147,72 @@ public class Server implements ServerInterface {
 				String unlocked = "unlock";
 				if(unlocked.equals(hashm.get(file_name)))
 				{
-					try{
+					
 					hashm.put(file_name,Integer.toString(clientid));
-					byte[] hash=null;
-					File fichier = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name);
-					String content=FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name);
-					MessageDigest md = MessageDigest.getInstance("SHA1");
- 					byte[] octetx = content.getBytes(); 
- 					hash = md.digest(octetx);
- 					System.out.println(hash);
- 				}catch (NoSuchAlgorithmException e) 
-    			{
-    				e.printStackTrace();
-    			}
-					/*envoyer le fichier si cheaksum pas bon*/
+					if (checksum.equals(FileToChecksum("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name)))
+					{
+						return "1";
+					}
+					else
+					{
+						return FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name);
+					}
+					
 				}
 				else
 				{
-					/*fichier deja verouillé*/
-					int a;
+					return "-1";
 				}
 			}
 			else{
-				//fichier existe pas
-				int i;
+				
+				return "no file";
 			}
-			return true;
+			
 
 	} 
 
+  public String get(String name, String checksum) throws RemoteException {
+		String file_content_buffer = "";
+		File f1 = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
+		if (!f1.exists()) {
+			file_content_buffer = null;
+		} else if (checksum.equals(FileToChecksum("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + name))) {
+			file_content_buffer = null;
+		} else if (checksum.equals("-1")) {
+			file_content_buffer = FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
+		} else {
+			file_content_buffer = FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
+			System.out.println("test");
+		}
+		return file_content_buffer;
+  }
 
+	private String FileToChecksum(String name) {
+		int i = 0;
+		byte [] file_content_buffer = new byte[1024];
+    StringBuffer sb = new StringBuffer("");
+    String checksum = "";
+    try {
+      MessageDigest md = MessageDigest.getInstance("SHA1");
+      FileInputStream file_reader = new FileInputStream(name);
+
+      while ((i=file_reader.read(file_content_buffer)) != -1) {
+        md.update(file_content_buffer, 0, i);
+      }
+
+      byte[] mdbytes = md.digest();
+
+      for (int k = 0; k < mdbytes.length; k++) {
+        sb.append(Integer.toString((mdbytes[k] & 0xff) + 0x100, 16).substring(1));
+      }
+    } catch (FileNotFoundException e) {
+      System.out.println("Erreur: " + e.getMessage());
+    } catch (NoSuchAlgorithmException e) {
+      System.out.println("Erreur: " + e.getMessage());
+    } catch (IOException e) {
+      System.out.println("Erreur: " + e.getMessage());
+    }
+    return checksum = sb.toString();
+	}
 }
