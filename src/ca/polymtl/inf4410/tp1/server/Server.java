@@ -130,7 +130,7 @@ public class Server implements ServerInterface {
 		String file_content_buffer = "";
 		File f1 = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
 		if (!f1.exists()) {
-			file_content_buffer = null;
+			file_content_buffer = "-2";
 		} else if (checksum.equals(FileToChecksum("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + name))) {
 			file_content_buffer = null;
 		} else if (checksum.equals("-1")) {
@@ -169,4 +169,24 @@ public class Server implements ServerInterface {
     }
     return checksum = sb.toString();
 	}
+
+	public int push(String file_name, String file_content, int client_id) throws RemoteException {
+		int state = 0;
+		if (hashm.containsKey(file_name)) {
+			if(hashm.get(file_name).equals("unlock")) {
+				state = -1;
+			} else if(hashm.get(file_name).equals(Integer.toString(client_id))) {
+				try {
+					File f1 = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name);
+					BufferedWriter file_writer = new BufferedWriter(new FileWriter(f1));
+					file_writer.write(file_content);
+					file_writer.close();
+				}catch (IOException e) {
+	        System.out.println("Erreur: " + e.getMessage());
+	      }
+			}
+		}
+		return state;
+	}
+
 }

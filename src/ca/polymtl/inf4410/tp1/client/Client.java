@@ -12,9 +12,10 @@ import java.rmi.registry.Registry;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class Client {
-  HashMap<String, Integer> checksum_list = new HashMap<String, Integer>();
 	private int id;
 	public static void main(String[] args) {
 		String Hostname = "127.0.0.1";
@@ -101,6 +102,9 @@ public class Client {
 					break;
         case "get":
           get(fichier);
+          break;
+        case "push":
+          push(fichier);
           break;
    			default :
    				System.out.println("Commande non reconnue");
@@ -209,7 +213,9 @@ public class Client {
         } else {
           String file_content_buffer = ServerStub.get(file_name, FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
           if (file_content_buffer == null) {
-            System.out.println("Error : File already up to date or missing from server...\n");
+            System.out.println("Error : File already up to date...\n");
+          } else if (file_content_buffer.equals("-2")){
+            System.out.println("Error : File missing from server...\n");
           } else {
             BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
             file_writer.write(file_content_buffer);
@@ -248,4 +254,30 @@ public class Client {
     }
     return checksum = sb.toString();
 	}
+
+  private void push(String file_name) {
+    int state = 0;
+    try {
+      if((new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name)).exists()) {
+        if ((state = ServerStub.push(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/" + file_name), this.id)) == 0 ) {
+          System.out.println(file_name + "sent to the server...");
+        } else {
+          System.out.println(file_name + "cannot be sent... \nPlease lock the file first");
+        }
+      }
+    } catch (RemoteException e) {
+      System.out.println("Erreur: " + e.getMessage());
+    }
+  }
+
+  private String FileToString(String filePath) {
+    String result = "";
+    try {
+        result = new String (Files.readAllBytes(Paths.get(filePath)));
+    } catch (IOException e) {
+        System.out.println("Erreur: " + e.getMessage());
+    }
+    return result;
+  }
+
 }

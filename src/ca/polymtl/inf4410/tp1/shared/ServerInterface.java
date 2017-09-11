@@ -11,4 +11,5 @@ public interface ServerInterface extends Remote {
 	public int generateclientid() throws RemoteException;
 	public HashMap<String, String> syncLocalDir() throws RemoteException;
 	public String get(String filename, String checksum) throws RemoteException;
+	public int push(String file_name, String file_content, int client_id) throws RemoteException;
 }
