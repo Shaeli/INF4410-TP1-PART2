@@ -7,11 +7,19 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
 import java.io.*;
-
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.io.FileInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import ca.polymtl.inf4410.tp1.shared.ServerInterface;
 
 public class Client {
+
 	private int id;
+	private ServerInterface ServerStub = null;
+
+
 	public static void main(String[] args) {
 		String Hostname = "127.0.0.1";
 		String commande=null;
@@ -36,8 +44,6 @@ public class Client {
 		}
 	}
 
-
-	private ServerInterface ServerStub = null;
 
 	public Client(String Hostame) {
 		super();
@@ -92,9 +98,12 @@ public class Client {
      		case "list" :
      		 	list();
      		 	break;
-				case "syncLocalDir":
-					syncLocalDir();
-					break;
+			case "syncLocalDir":
+				syncLocalDir();
+				break;
+			case "lock" :
+				lock(fichier);
+				break;
    			default :
    				System.out.println("Commande non reconnue");
    				break;
@@ -182,10 +191,59 @@ public class Client {
 			} catch (IOException e) {
 			  System.out.println("Erreur: " + e.getMessage());
 			}
-		} catch (RemoteException e) {
+		}catch (RemoteException e) {
 			System.out.println("Erreur: " + e.getMessage());
 		}
 
 
 	}
+
+	private void lock (String file_name)
+	{
+		if (file_name!= null)
+		{	
+			byte[] hash=null;
+			File fichier = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
+			String content="";
+
+			if (fichier.exists()) 
+			{
+				try 
+				{
+					content= new String (Files.readAllBytes(Paths.get("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name)));
+ 					MessageDigest md = MessageDigest.getInstance("SHA1");
+ 					byte[] octetx = content.getBytes(); 
+ 					hash = md.digest(octetx);
+ 					System.out.println(hash);
+ 					try{
+ 						ServerStub.lock(file_name,id,hash);
+ 					}catch (RemoteException e)
+					{
+						System.out.println("Erreur: " + e.getMessage());
+					}	
+
+				}catch (IOException e) 
+    			{
+    				e.printStackTrace();
+    			}catch (NoSuchAlgorithmException e) 
+    			{
+    				e.printStackTrace();
+    			}
+			}
+			else
+			{
+					System.out.println("Le fichier n'existe pas localement");
+			}
+
+			//try
+			//{
+				//String result = ServerStub.lock(file_name,id,hash);
+				System.out.println("bjr");
+			//}
+			
+		}
+
+	}
+
+
 }

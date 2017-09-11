@@ -9,7 +9,8 @@ import java.util.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import ca.polymtl.inf4410.tp1.shared.ServerInterface;
 
@@ -17,7 +18,7 @@ public class Server implements ServerInterface {
 
 	private int nb_client=0;
 	HashMap<String, String> hashm = new HashMap<String, String>();
-
+	private Object mutex_id=new Object();
 	public static void main(String[] args) {
 		Server server = new Server();
 		server.run();
@@ -90,8 +91,6 @@ public class Server implements ServerInterface {
 	      	{
 	        	Map.Entry entry = (Map.Entry)it.next();
 	        	result = result + "\n" + entry.getKey();
-
-	        // System.out.println(entry.getValue());
 	      	}
 
 	      	result=result+"\n";
@@ -102,27 +101,72 @@ public class Server implements ServerInterface {
 
 	public int generateclientid() throws RemoteException
 	{
-		return ++nb_client; // note a moi même :synchronized a faire
+		synchronized(mutex_id)
+		{
+			return ++nb_client;
+		}
 	}
 
 
-  public HashMap<String, String> syncLocalDir() throws RemoteException {
-    HashMap<String, String> files = new HashMap<String, String>();
-    for (String file_name : hashm.keySet()) {
-      files.put(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + file_name));
-    }
-    return files;
-  }
+  	public HashMap<String, String> syncLocalDir() throws RemoteException 
+  	{
+    	HashMap<String, String> files = new HashMap<String, String>();
+    	for (String file_name : hashm.keySet()) 
+    	{
+      		files.put(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + file_name));
+    	}
+    	return files;
+  	}
 
-  private String FileToString(String filePath) {
-    String result = "";
-    try {
-        result = new String (Files.readAllBytes(Paths.get(filePath)));
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-    return result;
-  }
+  	private String FileToString(String filePath) 
+  	{
+    	String result = "";
+    	try {
+        	result = new String (Files.readAllBytes(Paths.get(filePath)));
+    	}
+    	catch (IOException e) 
+    	{
+    		e.printStackTrace();
+    	}
+    	return result;
+  	}
+
+	public boolean lock(String file_name, int clientid, byte[]checksum) throws RemoteException
+	{
+			
+			if(hashm.containsKey(file_name))
+			{
+				String unlocked = "unlock";
+				if(unlocked.equals(hashm.get(file_name)))
+				{
+					try{
+					hashm.put(file_name,Integer.toString(clientid));
+					byte[] hash=null;
+					File fichier = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name);
+					String content=FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name);
+					MessageDigest md = MessageDigest.getInstance("SHA1");
+ 					byte[] octetx = content.getBytes(); 
+ 					hash = md.digest(octetx);
+ 					System.out.println(hash);
+ 				}catch (NoSuchAlgorithmException e) 
+    			{
+    				e.printStackTrace();
+    			}
+					/*envoyer le fichier si cheaksum pas bon*/
+				}
+				else
+				{
+					/*fichier deja verouillé*/
+					int a;
+				}
+			}
+			else{
+				//fichier existe pas
+				int i;
+			}
+			return true;
+
+	} 
 
 
 }
