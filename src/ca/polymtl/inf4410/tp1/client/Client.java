@@ -215,6 +215,7 @@ public class Client {
 
 	private void lock (String file_name)
 	{
+		String response;
 		if (file_name!= null)
 		{	
 			File fichier = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
@@ -222,30 +223,44 @@ public class Client {
 			{
 				try 
 				{
- 					String response=ServerStub.lock(file_name,id,FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
- 					if (response.equals("-1"))
- 					{
- 						System.out.println("Fichier deja verouillé");
+ 					response=ServerStub.lock(file_name,id,FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
+ 				}catch (RemoteException e)
+				{
+					System.out.println("Erreur: " + e.getMessage());
+				}
+			else /*si le client ne possède pas le fichier*/
+			{
+				try 
+				{
+ 					response=ServerStub.lock(file_name,id,"-1");
+				}catch (RemoteException e)
+				{
+					System.out.println("Erreur: " + e.getMessage());
+				}	
+			}	
+ 			if (response.equals("-1"))
+ 			{
+ 				System.out.println("Fichier deja verouillé");
 
- 					}else if (response.equals("no file"))
- 					{
-						System.out.println("Le fichier n'existe pas sur le serveur");
- 					}else if (response.equals("1"))
- 					{
- 						System.out.println("Fichier verouillé");
- 					}else
- 					{
-						try
-						{
-							BufferedWriter file_writer = new BufferedWriter(new FileWriter(fichier));
-           					file_writer.write(response);
-            				file_writer.close();
-							System.out.println("Fichier verouillé et téléchargé");
-						}catch(IOException e)
-						{
-       						 System.out.println("Erreur: " + e.getMessage());
-      					}
- 					}
+ 			}else if (response.equals("no file"))
+ 			{
+				System.out.println("Le fichier n'existe pas sur le serveur");
+ 			}else if (response.equals("1"))
+ 			{
+ 				System.out.println("Fichier verouillé");
+ 			}else
+ 			{
+				try
+				{
+					BufferedWriter file_writer = new BufferedWriter(new FileWriter(fichier));
+           			file_writer.write(response);
+            		file_writer.close();
+					System.out.println("Fichier verouillé et téléchargé");
+				}catch(IOException e)
+				{
+       				 System.out.println("Erreur: " + e.getMessage());
+      			}
+ 			}
 
 
  				}catch (RemoteException e)
@@ -254,16 +269,7 @@ public class Client {
 				}	
 
 			}	
-			else /*si le client ne possède pas le fichier*/
-			{
-				try 
-				{
- 					String response=ServerStub.lock(file_name,id,"-1");
-				}catch (RemoteException e)
-				{
-					System.out.println("Erreur: " + e.getMessage());
-				}	
-			}
+			
 
 			
 			
