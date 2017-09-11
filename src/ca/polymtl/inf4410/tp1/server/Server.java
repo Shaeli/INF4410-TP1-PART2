@@ -102,7 +102,16 @@ public class Server implements ServerInterface {
 
 	public int generateclientid() throws RemoteException
 	{
-		return ++nb_client;
+		return ++nb_client; // note a moi même :synchronized a faire
 	}
+
+	public int get(String filename, long checksum) throws RemoteException
+	{
+
+		
+	}
+
+
+	
 	
 }

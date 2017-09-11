@@ -7,4 +7,5 @@ public interface ServerInterface extends Remote {
 	public String create(String file_name) throws RemoteException;
 	public String list() throws RemoteException;
 	public int generateclientid() throws RemoteException;
+	public int get(String filename,) throws RemoteException;
 }
