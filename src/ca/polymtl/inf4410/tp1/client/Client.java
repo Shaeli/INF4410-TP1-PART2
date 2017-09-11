@@ -215,7 +215,7 @@ public class Client {
 
 	private void lock (String file_name)
 	{
-		String response;
+		String response=null;
 		if (file_name!= null)
 		{	
 			File fichier = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
@@ -228,6 +228,7 @@ public class Client {
 				{
 					System.out.println("Erreur: " + e.getMessage());
 				}
+			}
 			else /*si le client ne possède pas le fichier*/
 			{
 				try 
@@ -238,14 +239,14 @@ public class Client {
 					System.out.println("Erreur: " + e.getMessage());
 				}	
 			}	
- 			if (response.equals("-1"))
+ 			if (response.equals("locked"))
  			{
  				System.out.println("Fichier deja verouillé");
 
- 			}else if (response.equals("no file"))
+ 			}else if (response.equals("-1"))
  			{
 				System.out.println("Le fichier n'existe pas sur le serveur");
- 			}else if (response.equals("1"))
+ 			}else if (response==null)
  			{
  				System.out.println("Fichier verouillé");
  			}else
@@ -260,19 +261,7 @@ public class Client {
 				{
        				 System.out.println("Erreur: " + e.getMessage());
       			}
- 			}
-
-
- 				}catch (RemoteException e)
-				{
-					System.out.println("Erreur: " + e.getMessage());
-				}	
-
-			}	
-			
-
-			
-			
+ 			}	
 		}
 
 	}

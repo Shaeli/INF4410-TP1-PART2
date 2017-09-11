@@ -149,41 +149,39 @@ public class Server implements ServerInterface {
 				{
 					
 					hashm.put(file_name,Integer.toString(clientid));
-					if (checksum.equals(FileToChecksum("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name)))
-					{
-						return "1";
-					}
-					else
-					{
-						return FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name);
-					}
+					// if (checksum.equals(FileToChecksum("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name)))
+					// {
+					// 	return "1";
+					// }
+					// else
+					// {
+					// 	return FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name);
+					// }
+					return get(file_name,checksum);
 					
 				}
 				else
 				{
-					return "-1";
+					return "locked";
 				}
 			}
 			else{
 				
-				return "no file";
+				return "-1";
 			}
-			
-
 	} 
 
   public String get(String name, String checksum) throws RemoteException {
 		String file_content_buffer = "";
 		File f1 = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
 		if (!f1.exists()) {
-			file_content_buffer = null;
+			file_content_buffer = "-2";
 		} else if (checksum.equals(FileToChecksum("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + name))) {
 			file_content_buffer = null;
 		} else if (checksum.equals("-1")) {
 			file_content_buffer = FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
 		} else {
 			file_content_buffer = FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
-			System.out.println("test");
 		}
 		return file_content_buffer;
   }
