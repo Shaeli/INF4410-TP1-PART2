@@ -9,5 +9,6 @@ public interface ServerInterface extends Remote {
 	public String list() throws RemoteException;
 	public int generateclientid() throws RemoteException;
 	public HashMap<String, String> syncLocalDir() throws RemoteException;
+	public String get(String name, String checksum) throws RemoteException;
 
 }
