@@ -4,11 +4,11 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.*;
 
+
 public interface ServerInterface extends Remote {
 	public String create(String file_name) throws RemoteException;
 	public String list() throws RemoteException;
 	public int generateclientid() throws RemoteException;
 	public HashMap<String, String> syncLocalDir() throws RemoteException;
-	public String get(String name, String checksum) throws RemoteException;
-
+	public String get(String filename, String checksum) throws RemoteException;
 }

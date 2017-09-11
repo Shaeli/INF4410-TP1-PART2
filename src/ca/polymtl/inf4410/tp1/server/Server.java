@@ -104,8 +104,9 @@ public class Server implements ServerInterface {
 
 	public int generateclientid() throws RemoteException
 	{
-		return ++nb_client;
+		return ++nb_client; // note a moi même :synchronized a faire
 	}
+
 
   public HashMap<String, String> syncLocalDir() throws RemoteException {
     HashMap<String, String> files = new HashMap<String, String>();

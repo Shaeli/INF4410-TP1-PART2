@@ -171,6 +171,7 @@ public class Client {
 		return id;
 	}
 
+
 	private void syncLocalDir() {
 		try {
 			HashMap<String, String> files = new HashMap<String, String>();
@@ -191,6 +192,8 @@ public class Client {
 		} catch (RemoteException e) {
 			System.out.println("Erreur: " + e.getMessage());
 		}
+
+
 	}
 
 	private void get(String file_name) {
