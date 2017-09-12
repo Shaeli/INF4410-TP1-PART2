@@ -193,6 +193,7 @@ public class Client {
 					file_writer.write(files.get(file_name));
 					file_writer.close();
 				}
+        System.out.println("Files created successfully...\n");
 			} catch (IOException e) {
 			  System.out.println("Erreur: " + e.getMessage());
 			}
@@ -232,14 +233,14 @@ public class Client {
 			}
  			if (response.equals("locked"))
  			{
- 				System.out.println("Fichier deja verouillé");
+ 				System.out.println("file already locked...\n");
 
  			}else if (response.equals("-1"))
  			{
-				System.out.println("Le fichier n'existe pas sur le serveur");
- 			}else if (response == "1")
+				System.out.println("File doesn't exist on the server...\n");
+ 			}else if (response == "0")
  			{
- 				System.out.println("Fichier verouillé");
+ 				System.out.println("file locked...\n");
  			}else
  			{
 				try
@@ -247,7 +248,7 @@ public class Client {
 					BufferedWriter file_writer = new BufferedWriter(new FileWriter(fichier));
            			file_writer.write(response);
             		file_writer.close();
-					System.out.println("Fichier verouillé et téléchargé");
+					System.out.println("File downloaded and locked successfully...\n");
 				}catch(IOException e)
 				{
        				 System.out.println("Erreur: " + e.getMessage());
@@ -268,9 +269,10 @@ public class Client {
           BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
           file_writer.write(file_content_buffer);
           file_writer.close();
+          System.out.println("File created successfully...\n");
         } else {
           String file_content_buffer = ServerStub.get(file_name, FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
-          if (file_content_buffer == "1") {
+          if (file_content_buffer == "0") {
             System.out.println("Error : File already up to date...\n");
           } else if (file_content_buffer.equals("-2")){
             System.out.println("Error : File missing from server...\n");
@@ -278,6 +280,7 @@ public class Client {
             BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
             file_writer.write(file_content_buffer);
             file_writer.close();
+            System.out.println("File updated successfully...\n");
           }
         }
       } catch (IOException e) {
@@ -318,11 +321,12 @@ public class Client {
     try {
       if((new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name)).exists()) {
         if ((state = ServerStub.push(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/" + file_name), this.id)) == 0 ) {
-          System.out.println(file_name + "sent to the server...");
+          System.out.println(file_name + " sent to the server...\n");
         } else {
-          System.out.println(file_name + "cannot be sent... \nPlease lock the file first");
+          System.out.println(file_name + " cannot be sent... \n...Please lock the file first\n");
         }
       }
+      System.out.println(file_name + " is now unlocked... \n");;
     } catch (RemoteException e) {
       System.out.println("Erreur: " + e.getMessage());
     }
