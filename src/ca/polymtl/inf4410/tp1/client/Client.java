@@ -272,7 +272,7 @@ public class Client {
           System.out.println("File created successfully...\n");
         } else {
           String file_content_buffer = ServerStub.get(file_name, FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
-          if (file_content_buffer == "0") {
+          if (file_content_buffer.equals("0")) {
             System.out.println("Error : File already up to date...\n");
           } else if (file_content_buffer.equals("-2")){
             System.out.println("Error : File missing from server...\n");
