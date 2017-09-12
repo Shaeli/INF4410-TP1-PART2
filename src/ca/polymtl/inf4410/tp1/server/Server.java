@@ -147,16 +147,7 @@ public class Server implements ServerInterface {
 				String unlocked = "unlock";
 				if(unlocked.equals(hashm.get(file_name)))
 				{
-					
 					hashm.put(file_name,Integer.toString(clientid));
-					// if (checksum.equals(FileToChecksum("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name)))
-					// {
-					// 	return "1";
-					// }
-					// else
-					// {
-					// 	return FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name);
-					// }
 					return get(file_name,checksum);
 					
 				}
