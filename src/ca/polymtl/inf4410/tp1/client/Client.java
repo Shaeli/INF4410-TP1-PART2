@@ -237,7 +237,7 @@ public class Client {
  			}else if (response.equals("-1"))
  			{
 				System.out.println("Le fichier n'existe pas sur le serveur");
- 			}else if (response == "1")
+ 			}else if (response.equals("1"))
  			{
  				System.out.println("Fichier verouillé");
  			}else
