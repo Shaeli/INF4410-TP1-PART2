@@ -16,3 +16,4 @@ public interface ServerInterface extends Remote {
 	public String get(String filename, String checksum) throws RemoteException;
 	public int push(String file_name, String file_content, int client_id) throws RemoteException;
 	public String lock(String file_name, int clientid, String checksum) throws RemoteException;
+}

@@ -206,7 +206,7 @@ public class Client {
 
 	private void lock (String file_name)
 	{
-		String response=null;
+		String response = "";
 		if (file_name!= null)
 		{
 			File fichier = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
@@ -237,7 +237,7 @@ public class Client {
  			}else if (response.equals("-1"))
  			{
 				System.out.println("Le fichier n'existe pas sur le serveur");
- 			}else if (response==null)
+ 			}else if (response == "1")
  			{
  				System.out.println("Fichier verouillé");
  			}else
@@ -270,7 +270,7 @@ public class Client {
           file_writer.close();
         } else {
           String file_content_buffer = ServerStub.get(file_name, FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
-          if (file_content_buffer == null) {
+          if (file_content_buffer == "1") {
             System.out.println("Error : File already up to date...\n");
           } else if (file_content_buffer.equals("-2")){
             System.out.println("Error : File missing from server...\n");

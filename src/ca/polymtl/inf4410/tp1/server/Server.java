@@ -116,23 +116,23 @@ public class Server implements ServerInterface {
 	}
 
 
-  	public HashMap<String, String> syncLocalDir() throws RemoteException 
+  	public HashMap<String, String> syncLocalDir() throws RemoteException
   	{
     	HashMap<String, String> files = new HashMap<String, String>();
-    	for (String file_name : hashm.keySet()) 
+    	for (String file_name : hashm.keySet())
     	{
       		files.put(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + file_name));
     	}
     	return files;
   	}
 
-  	private String FileToString(String filePath) 
+  	private String FileToString(String filePath)
   	{
     	String result = "";
     	try {
         	result = new String (Files.readAllBytes(Paths.get(filePath)));
     	}
-    	catch (IOException e) 
+    	catch (IOException e)
     	{
     		e.printStackTrace();
     	}
@@ -141,7 +141,7 @@ public class Server implements ServerInterface {
 
 	public String lock(String file_name, int clientid, String checksum) throws RemoteException
 	{
-			
+
 			if(hashm.containsKey(file_name))
 			{
 				String unlocked = "unlock";
@@ -149,7 +149,7 @@ public class Server implements ServerInterface {
 				{
 					hashm.put(file_name,Integer.toString(clientid));
 					return get(file_name,checksum);
-					
+
 				}
 				else
 				{
@@ -157,10 +157,10 @@ public class Server implements ServerInterface {
 				}
 			}
 			else{
-				
+
 				return "-1";
 			}
-	} 
+	}
 
   public String get(String name, String checksum) throws RemoteException {
 		String file_content_buffer = "";
@@ -168,7 +168,7 @@ public class Server implements ServerInterface {
 		if (!f1.exists()) {
 			file_content_buffer = "-2";
 		} else if (checksum.equals(FileToChecksum("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + name))) {
-			file_content_buffer = null;
+			file_content_buffer = "1";
 		} else if (checksum.equals("-1")) {
 			file_content_buffer = FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
 		} else {
