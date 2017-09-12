@@ -168,7 +168,7 @@ public class Server implements ServerInterface {
 		if (!f1.exists()) {
 			file_content_buffer = "-2";
 		} else if (checksum.equals(FileToChecksum("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + name))) {
-			file_content_buffer = "1";
+			file_content_buffer = "0";
 		} else if (checksum.equals("-1")) {
 			file_content_buffer = FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
 		} else {
@@ -216,6 +216,7 @@ public class Server implements ServerInterface {
 					BufferedWriter file_writer = new BufferedWriter(new FileWriter(f1));
 					file_writer.write(file_content);
 					file_writer.close();
+					hashm.put(file_name, "unlock");
 				}catch (IOException e) {
 	        System.out.println("Erreur: " + e.getMessage());
 	      }
