@@ -4,6 +4,9 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.*;
 
+import java.io.*;
+
+
 
 public interface ServerInterface extends Remote {
 	public String create(String file_name) throws RemoteException;
@@ -12,4 +15,4 @@ public interface ServerInterface extends Remote {
 	public HashMap<String, String> syncLocalDir() throws RemoteException;
 	public String get(String filename, String checksum) throws RemoteException;
 	public int push(String file_name, String file_content, int client_id) throws RemoteException;
-}
+	public String lock(String file_name, int clientid, String checksum) throws RemoteException;

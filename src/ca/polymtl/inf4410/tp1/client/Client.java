@@ -17,6 +17,8 @@ import java.nio.file.Paths;
 
 public class Client {
 	private int id;
+	private ServerInterface ServerStub = null;
+
 	public static void main(String[] args) {
 		String Hostname = "127.0.0.1";
 		String commande=null;
@@ -41,8 +43,6 @@ public class Client {
 		}
 	}
 
-
-	private ServerInterface ServerStub = null;
 
 	public Client(String Hostame) {
 		super();
@@ -106,6 +106,9 @@ public class Client {
         case "push":
           push(fichier);
           break;
+			  case "lock":
+				  lock(fichier);
+				  break;
    			default :
    				System.out.println("Commande non reconnue");
    				break;
@@ -193,12 +196,67 @@ public class Client {
 			} catch (IOException e) {
 			  System.out.println("Erreur: " + e.getMessage());
 			}
-		} catch (RemoteException e) {
+		}catch (RemoteException e) {
 			System.out.println("Erreur: " + e.getMessage());
 		}
 
 
 	}
+
+
+	private void lock (String file_name)
+	{
+		String response=null;
+		if (file_name!= null)
+		{
+			File fichier = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
+			if (fichier.exists())
+			{
+				try
+				{
+ 					response=ServerStub.lock(file_name,id,FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
+ 				}catch (RemoteException e)
+				{
+					System.out.println("Erreur: " + e.getMessage());
+				}
+			}
+			else /*si le client ne possède pas le fichier*/
+			{
+				try
+				{
+ 					response=ServerStub.lock(file_name,id,"-1");
+				}catch (RemoteException e)
+				{
+					System.out.println("Erreur: " + e.getMessage());
+				}
+			}
+ 			if (response.equals("locked"))
+ 			{
+ 				System.out.println("Fichier deja verouillé");
+
+ 			}else if (response.equals("-1"))
+ 			{
+				System.out.println("Le fichier n'existe pas sur le serveur");
+ 			}else if (response==null)
+ 			{
+ 				System.out.println("Fichier verouillé");
+ 			}else
+ 			{
+				try
+				{
+					BufferedWriter file_writer = new BufferedWriter(new FileWriter(fichier));
+           			file_writer.write(response);
+            		file_writer.close();
+					System.out.println("Fichier verouillé et téléchargé");
+				}catch(IOException e)
+				{
+       				 System.out.println("Erreur: " + e.getMessage());
+      			}
+ 			}
+		}
+
+	}
+
 
 	private void get(String file_name) {
 		try {

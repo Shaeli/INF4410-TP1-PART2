@@ -14,12 +14,19 @@ import java.rmi.server.UnicastRemoteObject;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import ca.polymtl.inf4410.tp1.shared.ServerInterface;
 
 public class Server implements ServerInterface {
 
 	private int nb_client=0;
 	HashMap<String, String> hashm = new HashMap<String, String>();
-
+	private Object mutex_id=new Object();
 	public static void main(String[] args) {
 		Server server = new Server();
 		server.run();
@@ -92,8 +99,6 @@ public class Server implements ServerInterface {
 	      	{
 	        	Map.Entry entry = (Map.Entry)it.next();
 	        	result = result + "\n" + entry.getKey();
-
-	        // System.out.println(entry.getValue());
 	      	}
 
 	      	result=result+"\n";
@@ -104,27 +109,67 @@ public class Server implements ServerInterface {
 
 	public int generateclientid() throws RemoteException
 	{
-		return ++nb_client; // note a moi même :synchronized a faire
+		synchronized(mutex_id)
+		{
+			return ++nb_client;
+		}
 	}
 
 
-  public HashMap<String, String> syncLocalDir() throws RemoteException {
-    HashMap<String, String> files = new HashMap<String, String>();
-    for (String file_name : hashm.keySet()) {
-      files.put(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + file_name));
-    }
-    return files;
-  }
+  	public HashMap<String, String> syncLocalDir() throws RemoteException 
+  	{
+    	HashMap<String, String> files = new HashMap<String, String>();
+    	for (String file_name : hashm.keySet()) 
+    	{
+      		files.put(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + file_name));
+    	}
+    	return files;
+  	}
 
-  private String FileToString(String filePath) {
-    String result = "";
-    try {
-        result = new String (Files.readAllBytes(Paths.get(filePath)));
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-    return result;
-  }
+  	private String FileToString(String filePath) 
+  	{
+    	String result = "";
+    	try {
+        	result = new String (Files.readAllBytes(Paths.get(filePath)));
+    	}
+    	catch (IOException e) 
+    	{
+    		e.printStackTrace();
+    	}
+    	return result;
+  	}
+
+	public String lock(String file_name, int clientid, String checksum) throws RemoteException
+	{
+			
+			if(hashm.containsKey(file_name))
+			{
+				String unlocked = "unlock";
+				if(unlocked.equals(hashm.get(file_name)))
+				{
+					
+					hashm.put(file_name,Integer.toString(clientid));
+					// if (checksum.equals(FileToChecksum("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name)))
+					// {
+					// 	return "1";
+					// }
+					// else
+					// {
+					// 	return FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name);
+					// }
+					return get(file_name,checksum);
+					
+				}
+				else
+				{
+					return "locked";
+				}
+			}
+			else{
+				
+				return "-1";
+			}
+	} 
 
   public String get(String name, String checksum) throws RemoteException {
 		String file_content_buffer = "";
@@ -137,7 +182,6 @@ public class Server implements ServerInterface {
 			file_content_buffer = FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
 		} else {
 			file_content_buffer = FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
-			System.out.println("test");
 		}
 		return file_content_buffer;
   }
