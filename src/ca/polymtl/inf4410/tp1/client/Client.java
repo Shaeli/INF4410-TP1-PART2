@@ -235,12 +235,12 @@ public class Client {
  			{
  				System.out.println("file already locked...\n");
 
- 			}else if (response.equals("-1"))
+ 			}else if (response.equals("-2"))
  			{
 				System.out.println("File doesn't exist on the server...\n");
  			}else if (response.equals("0"))
  			{
- 				System.out.println("file locked...\n");
+ 				System.out.println("file locked successfully ...\n");
  			}else
  			{
 				try
@@ -248,7 +248,7 @@ public class Client {
 					BufferedWriter file_writer = new BufferedWriter(new FileWriter(fichier));
            			file_writer.write(response);
             		file_writer.close();
-					System.out.println("File downloaded and locked successfully...\n");
+					System.out.println("File locked successfully...\n");
 				}catch(IOException e)
 				{
        				 System.out.println("Erreur: " + e.getMessage());

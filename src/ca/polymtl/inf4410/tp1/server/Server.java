@@ -98,9 +98,16 @@ public class Server implements ServerInterface {
 	      	while(it.hasNext())
 	      	{
 	        	Map.Entry entry = (Map.Entry)it.next();
-	        	result = result + "\n" + entry.getKey();
+	        	String file_name = (String)entry.getKey();
+	        	if(hashm.get(file_name).equals("unlock"))
+	        	{
+	        		result = result + "\n" + file_name + " non verouillé";
+	        	}
+	        	else
+	        	{
+	        		result = result + "\n" + file_name + " verouillé par client " + hashm.get(file_name);
+	        	}
 	      	}
-
 	      	result=result+"\n";
 	      	return result;
 		}
