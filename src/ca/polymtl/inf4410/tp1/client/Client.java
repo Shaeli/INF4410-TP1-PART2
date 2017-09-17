@@ -178,7 +178,6 @@ public class Client {
 		return id;
 	}
 
-
 	private void syncLocalDir() {
 		try {
 			HashMap<String, String> files = new HashMap<String, String>();
@@ -322,11 +321,11 @@ public class Client {
       if((new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name)).exists()) {
         if ((state = ServerStub.push(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/" + file_name), this.id)) == 0 ) {
           System.out.println(file_name + " sent to the server...\n");
+					System.out.println(file_name + " is now unlocked... \n");
         } else {
           System.out.println(file_name + " cannot be sent... \n...Please lock the file first\n");
         }
       }
-      System.out.println(file_name + " is now unlocked... \n");;
     } catch (RemoteException e) {
       System.out.println("Erreur: " + e.getMessage());
     }
