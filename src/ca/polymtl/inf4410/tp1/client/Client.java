@@ -118,15 +118,22 @@ public class Client {
 
 	private ServerInterface loadServerStub(String hostname) {
 		ServerInterface stub = null;
-		try {
+		try
+		{
 			Registry registry = LocateRegistry.getRegistry(hostname);
 			stub = (ServerInterface) registry.lookup("server");
-		} catch (NotBoundException e) {
+		}
+		catch (NotBoundException e)
+		{
 			System.out.println("Erreur: Le nom '" + e.getMessage()
 					+ "' n'est pas défini dans le registre.");
-		} catch (AccessException e) {
+		}
+		catch (AccessException e)
+		{
 			System.out.println("Erreur: " + e.getMessage());
-		} catch (RemoteException e) {
+		}
+		catch (RemoteException e)
+		{
 			System.out.println("Erreur: " + e.getMessage());
 		}
 
@@ -178,14 +185,19 @@ public class Client {
 		return id;
 	}
 
-	private void syncLocalDir() {
-		try {
+	private void syncLocalDir()
+	{
+		try
+		{
 			HashMap<String, String> files = new HashMap<String, String>();
 			files = ServerStub.syncLocalDir();
-			try {
-				for (String file_name : files.keySet()) {
+			try
+			{
+				for (String file_name : files.keySet())
+				{
 					File new_file = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
-					if (!new_file.exists()) {
+					if (!new_file.exists())
+					{
 						new_file.createNewFile();
 					}
 					BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
@@ -193,14 +205,16 @@ public class Client {
 					file_writer.close();
 				}
         System.out.println("Files created successfully...\n");
-			} catch (IOException e) {
+			}
+			catch (IOException e)
+			{
 			  System.out.println("Erreur: " + e.getMessage());
 			}
-		}catch (RemoteException e) {
+		}
+		catch (RemoteException e)
+		{
 			System.out.println("Erreur: " + e.getMessage());
 		}
-
-
 	}
 
 
@@ -215,7 +229,8 @@ public class Client {
 				try
 				{
  					response=ServerStub.lock(file_name,id,FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
- 				}catch (RemoteException e)
+ 				}
+				catch (RemoteException e)
 				{
 					System.out.println("Erreur: " + e.getMessage());
 				}
@@ -225,7 +240,8 @@ public class Client {
 				try
 				{
  					response=ServerStub.lock(file_name,id,"-1");
-				}catch (RemoteException e)
+				}
+				catch (RemoteException e)
 				{
 					System.out.println("Erreur: " + e.getMessage());
 				}
@@ -234,13 +250,16 @@ public class Client {
  			{
  				System.out.println("file already locked...\n");
 
- 			}else if (response.equals("-2"))
+ 			}
+			else if (response.equals("-2"))
  			{
 				System.out.println("File doesn't exist on the server...\n");
- 			}else if (response.equals("0"))
+ 			}
+			else if (response.equals("0"))
  			{
  				System.out.println("file locked successfully ...\n");
- 			}else
+ 			}
+			else
  			{
 				try
 				{
@@ -248,7 +267,8 @@ public class Client {
            			file_writer.write(response);
             		file_writer.close();
 					System.out.println("File locked successfully...\n");
-				}catch(IOException e)
+				}
+				catch(IOException e)
 				{
        				 System.out.println("Erreur: " + e.getMessage());
       			}
@@ -258,84 +278,117 @@ public class Client {
 	}
 
 
-	private void get(String file_name) {
-		try {
-        File new_file = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
+	private void get(String file_name)
+	{
+		try
+		{
+      File new_file = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
 
-        if (!new_file.exists()) {
-          new_file.createNewFile();
-          String file_content_buffer = ServerStub.get(file_name, "-1");
+      if (!new_file.exists())
+			{
+        new_file.createNewFile();
+        String file_content_buffer = ServerStub.get(file_name, "-1");
+        BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
+        file_writer.write(file_content_buffer);
+        file_writer.close();
+        System.out.println("File created successfully...\n");
+      }
+			else
+			{
+        String file_content_buffer = ServerStub.get(file_name, FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
+        if (file_content_buffer.equals("0"))
+				{
+          System.out.println("Error : File already up to date...\n");
+        }
+				else if (file_content_buffer.equals("-2"))
+				{
+          System.out.println("Error : File missing from server...\n");
+        }
+				else
+				{
           BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
           file_writer.write(file_content_buffer);
           file_writer.close();
-          System.out.println("File created successfully...\n");
-        } else {
-          String file_content_buffer = ServerStub.get(file_name, FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
-          if (file_content_buffer.equals("0")) {
-            System.out.println("Error : File already up to date...\n");
-          } else if (file_content_buffer.equals("-2")){
-            System.out.println("Error : File missing from server...\n");
-          } else {
-            BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
-            file_writer.write(file_content_buffer);
-            file_writer.close();
-            System.out.println("File updated successfully...\n");
-          }
+          System.out.println("File updated successfully...\n");
         }
-      } catch (IOException e) {
-        System.out.println("Erreur: " + e.getMessage());
       }
+    }
+		catch (IOException e)
+		{
+      System.out.println("Erreur: " + e.getMessage());
+    }
 	}
 
-  private String FileToChecksum(String name) {
+  private String FileToChecksum(String name)
+	{
 		int i = 0;
 		byte [] file_content_buffer = new byte[1024];
     StringBuffer sb = new StringBuffer("");
     String checksum = "";
-    try {
+    try
+		{
       MessageDigest md = MessageDigest.getInstance("SHA1");
       FileInputStream file_reader = new FileInputStream(name);
 
-      while ((i=file_reader.read(file_content_buffer)) != -1) {
+      while ((i=file_reader.read(file_content_buffer)) != -1)
+			{
         md.update(file_content_buffer, 0, i);
       }
 
       byte[] mdbytes = md.digest();
 
-      for (int k = 0; k < mdbytes.length; k++) {
+      for (int k = 0; k < mdbytes.length; k++)
+			{
         sb.append(Integer.toString((mdbytes[k] & 0xff) + 0x100, 16).substring(1));
       }
-    } catch (FileNotFoundException e) {
+    }
+		catch (FileNotFoundException e)
+		{
       System.out.println("Erreur: " + e.getMessage());
-    } catch (NoSuchAlgorithmException e) {
+    }
+		catch (NoSuchAlgorithmException e)
+		{
       System.out.println("Erreur: " + e.getMessage());
-    } catch (IOException e) {
+    }
+		catch (IOException e)
+		{
       System.out.println("Erreur: " + e.getMessage());
     }
     return checksum = sb.toString();
 	}
 
-  private void push(String file_name) {
+  private void push(String file_name)
+	{
     int state = 0;
-    try {
+    try
+		{
       if((new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name)).exists()) {
-        if ((state = ServerStub.push(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/" + file_name), this.id)) == 0 ) {
+        if ((state = ServerStub.push(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/" + file_name), this.id)) == 0 )
+				{
           System.out.println(file_name + " sent to the server...\n");
 					System.out.println(file_name + " is now unlocked... \n");
-        } else {
+        }
+				else
+				{
           System.out.println(file_name + " cannot be sent... \n...Please lock the file first\n");
         }
       }
-    } catch (RemoteException e) {
+    }
+		catch (RemoteException e)
+		{
       System.out.println("Erreur: " + e.getMessage());
     }
   }
 
-  private String FileToString(String filePath) {
+  private String FileToString(String filePath)
+	{
     String result = "";
-    try {
+    try
+		{
         result = new String (Files.readAllBytes(Paths.get(filePath)));
-    } catch (IOException e) {
+    }
+		catch (IOException e)
+		{
         System.out.println("Erreur: " + e.getMessage());
     }
     return result;

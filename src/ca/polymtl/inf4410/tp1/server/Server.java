@@ -136,7 +136,8 @@ public class Server implements ServerInterface {
   	private String FileToString(String filePath)
   	{
     	String result = "";
-    	try {
+    	try
+			{
         	result = new String (Files.readAllBytes(Paths.get(filePath)));
     	}
     	catch (IOException e)
@@ -169,62 +170,88 @@ public class Server implements ServerInterface {
 			}
 	}
 
-  public String get(String name, String checksum) throws RemoteException {
+  public String get(String name, String checksum) throws RemoteException
+	{
 		String file_content_buffer = "";
 		File f1 = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
-		if (!f1.exists()) {
+		if (!f1.exists())
+		{
 			file_content_buffer = "-2";
-		} else if (checksum.equals(FileToChecksum("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + name))) {
+		}
+		else if (checksum.equals(FileToChecksum("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + name)))
+		{
 			file_content_buffer = "0";
-		} else if (checksum.equals("-1")) {
+		}
+		else if (checksum.equals("-1"))
+		{
 			file_content_buffer = FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
-		} else {
+		}
+		else
+		{
 			file_content_buffer = FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
 		}
 		return file_content_buffer;
   }
 
-	private String FileToChecksum(String name) {
+	private String FileToChecksum(String name)
+	{
 		int i = 0;
 		byte [] file_content_buffer = new byte[1024];
     StringBuffer sb = new StringBuffer("");
     String checksum = "";
-    try {
+    try
+		{
       MessageDigest md = MessageDigest.getInstance("SHA1");
       FileInputStream file_reader = new FileInputStream(name);
 
-      while ((i=file_reader.read(file_content_buffer)) != -1) {
+      while ((i=file_reader.read(file_content_buffer)) != -1)
+			{
         md.update(file_content_buffer, 0, i);
       }
 
       byte[] mdbytes = md.digest();
 
-      for (int k = 0; k < mdbytes.length; k++) {
+      for (int k = 0; k < mdbytes.length; k++)
+			{
         sb.append(Integer.toString((mdbytes[k] & 0xff) + 0x100, 16).substring(1));
       }
-    } catch (FileNotFoundException e) {
+    }
+		catch (FileNotFoundException e)
+		{
       System.out.println("Erreur: " + e.getMessage());
-    } catch (NoSuchAlgorithmException e) {
+    }
+		catch (NoSuchAlgorithmException e)
+		{
       System.out.println("Erreur: " + e.getMessage());
-    } catch (IOException e) {
+    }
+		catch (IOException e)
+		{
       System.out.println("Erreur: " + e.getMessage());
     }
     return checksum = sb.toString();
 	}
 
-	public int push(String file_name, String file_content, int client_id) throws RemoteException {
+	public int push(String file_name, String file_content, int client_id) throws RemoteException
+	{
 		int state = 0;
-		if (hashm.containsKey(file_name)) {
-			if(hashm.get(file_name).equals("unlock")) {
+		if (hashm.containsKey(file_name))
+		{
+			if(hashm.get(file_name).equals("unlock"))
+			{
 				state = -1;
-			} else if(hashm.get(file_name).equals(Integer.toString(client_id))) {
-				try {
+			}
+			else if(hashm.get(file_name).equals(Integer.toString(client_id)))
+			{
+				try
+				{
 					File f1 = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name);
 					BufferedWriter file_writer = new BufferedWriter(new FileWriter(f1));
 					file_writer.write(file_content);
 					file_writer.close();
 					hashm.put(file_name, "unlock");
-				}catch (IOException e) {
+				}
+				catch (IOException e)
+				{
 	        System.out.println("Erreur: " + e.getMessage());
 	      }
 			}
