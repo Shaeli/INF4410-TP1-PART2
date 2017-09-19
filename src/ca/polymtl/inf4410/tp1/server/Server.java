@@ -65,18 +65,18 @@ public class Server implements ServerInterface {
 			try
 			{
 				new_file.createNewFile();
-				chain=file_name+" ajouté";
+				chain=file_name+" created";
 				hashm.put(file_name,"unlock");
 			}catch(IOException e)
 			{
 				System.err.println();
 				System.err.println("Erreur: " + e.getMessage());
-				chain="la creation du fichier a echoue";
+				chain="Error during creation";
 			}
 		}
 		else
 		{
-			chain="Erreur le fichier existe deja";
+			chain="Error: file already exists";
 		}
 
 		System.out.println(chain);
@@ -85,10 +85,11 @@ public class Server implements ServerInterface {
 
 	public String list() throws RemoteException
 	{
+		int cpt = 0;
 		String result = "";
 		if (hashm.isEmpty())
 		{
-			return "aucun fichier\n";
+			return "0 files\n";
 
 		}
 		else
@@ -97,18 +98,19 @@ public class Server implements ServerInterface {
 	      	Iterator it = set.iterator();
 	      	while(it.hasNext())
 	      	{
+	      		cpt++;
 	        	Map.Entry entry = (Map.Entry)it.next();
 	        	String file_name = (String)entry.getKey();
 	        	if(hashm.get(file_name).equals("unlock"))
 	        	{
-	        		result = result + "\n" + file_name + " non verouillé";
+	        		result = result + "\n" + file_name + " : unlocked";
 	        	}
 	        	else
 	        	{
-	        		result = result + "\n" + file_name + " verouillé par client " + hashm.get(file_name);
+	        		result = result + "\n" + file_name + " : locked by Client " + hashm.get(file_name);
 	        	}
 	      	}
-	      	result=result+"\n";
+	      	result=result+"\n"+cpt+" Files\n";
 	      	return result;
 		}
 
@@ -152,6 +154,7 @@ public class Server implements ServerInterface {
 
 			if(hashm.containsKey(file_name))
 			{
+				System.out.println("ok");
 				String unlocked = "unlock";
 				if(unlocked.equals(hashm.get(file_name)))
 				{
@@ -161,12 +164,11 @@ public class Server implements ServerInterface {
 				}
 				else
 				{
-					return "locked";
+					return ("locked by Client " + hashm.get(file_name));
 				}
 			}
 			else{
-
-				return "-1";
+				return "-2";
 			}
 	}
 
@@ -254,6 +256,10 @@ public class Server implements ServerInterface {
 				{
 	        System.out.println("Erreur: " + e.getMessage());
 	      }
+			}
+			else 
+			{
+				state = 1;
 			}
 		}
 		return state;
