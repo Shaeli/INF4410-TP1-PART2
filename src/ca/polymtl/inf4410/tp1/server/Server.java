@@ -124,7 +124,14 @@ public class Server implements ServerInterface {
 		}
 	}
 
-
+		/**
+		* Cette méthode permet de synchroniser le répertoire du client avec le serveur à distance.
+		* Aucune vérification du checksum, les fichiers coté serveur sont recopiés coté client.
+		*	Coté serveur, vérification de l'existence du fichier.
+		*
+		* @param : Void
+		* @return : HashMap<String, String>
+		*/
   	public HashMap<String, String> syncLocalDir() throws RemoteException
   	{
     	HashMap<String, String> files = new HashMap<String, String>();
@@ -135,6 +142,13 @@ public class Server implements ServerInterface {
     	return files;
   	}
 
+
+		/**
+		* Cette méthode permet de convertir un fichier en string afin de pouvoir l'envoyer sur le réseau.
+		*
+		* @param : String représentant le nom du fichier à convertir
+		* @return : String -> String du fichier
+		*/
   	private String FileToString(String filePath)
   	{
     	String result = "";
@@ -172,6 +186,15 @@ public class Server implements ServerInterface {
 			}
 	}
 
+	/**
+	* Cet méthode permet de récupérer un fichier coté serveur et de le copié dans le repertoire courant du client.
+	* Si le client ne possède pas le fichier, il envoie -1 au serveur pour forcer l'envoie.
+	* Le serveur peut renvoyer certaines informations comme la non présence du fichier sur le serveur ou encore le fait que le fichier soit déja à jour coté client.
+	*
+	* @param : String représentant le nom du fichier à convertir.
+	* @param : String représentant le checksum du fichier à convertir.
+	* @return : String contenant le fichier.
+	*/
   public String get(String name, String checksum) throws RemoteException
 	{
 		String file_content_buffer = "";
@@ -195,6 +218,14 @@ public class Server implements ServerInterface {
 		return file_content_buffer;
   }
 
+
+	/**
+	* Cette méthode permet de convertir un fichier en un checksum via l'appel à
+	* la librairie MessageDigest et l'utilisation de la fonction de hachage SHA1.
+	*
+	* @param : String représentant le nom du fichier à convertir
+	* @return : String -> checksum du fichier
+	*/
 	private String FileToChecksum(String name)
 	{
 		int i = 0;
@@ -233,6 +264,18 @@ public class Server implements ServerInterface {
     return checksum = sb.toString();
 	}
 
+
+	/**
+	* Cette méthode permet de convertir en String le fichier dont le nom est passé en paramètres.
+	* Avant de valider l'envoie des données, plusieurs aspects sont vérifiés :
+	*		Fichier doit être lock via l'id du client
+	*		Le fichier existe coté serveur
+	*
+	* @param : String représentant le nom du fichier à convertir
+	* @param : String représentant le contenu du fichier envoyé au serveur.
+	* @param : int correspondant à l'id de l'utilisateur souhaitant envoyer le fichier.
+	* @return : int représentant l'état de la requête
+	*/
 	public int push(String file_name, String file_content, int client_id) throws RemoteException
 	{
 		int state = 0;
@@ -257,7 +300,7 @@ public class Server implements ServerInterface {
 	        System.out.println("Erreur: " + e.getMessage());
 	      }
 			}
-			else 
+			else
 			{
 				state = 1;
 			}
