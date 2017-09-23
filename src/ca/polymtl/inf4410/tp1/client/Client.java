@@ -185,6 +185,14 @@ public class Client {
 		return id;
 	}
 
+
+	/**
+	* Cette méthode permet de synchroniser le répertoire du client avec le serveur à distance.
+	* Aucune vérification du checksum, les fichiers coté serveur sont recopiés coté client.
+	*
+	* @param : Void
+	* @return : Void
+	*/
 	private void syncLocalDir()
 	{
 		try
@@ -278,6 +286,14 @@ public class Client {
 	}
 
 
+	/**
+	* Cet méthode permet de récupérer un fichier coté serveur et de le copié dans le repertoire courant du client.
+	* Si le client ne possède pas le fichier, il envoie -1 au serveur pour forcer l'envoie.
+	* Le serveur peut renvoyer certaines informations comme la non présence du fichier sur le serveur ou encore le fait que le fichier soit déja à jour coté client.
+	*
+	* @param : String représentant le nom du fichier à convertir
+	* @return : void
+	*/
 	private void get(String file_name)
 	{
 		try
@@ -319,6 +335,14 @@ public class Client {
     }
 	}
 
+
+	/**
+	* Cette méthode permet de convertir un fichier en un checksum via l'appel à
+	* la librairie MessageDigest et l'utilisation de la fonction de hachage SHA1.
+	*
+	* @param : String représentant le nom du fichier à convertir
+	* @return : String -> checksum du fichier
+	*/
   private String FileToChecksum(String name)
 	{
 		int i = 0;
@@ -357,6 +381,16 @@ public class Client {
     return checksum = sb.toString();
 	}
 
+
+	/**
+	* Cette méthode permet de convertir en String le fichier dont le nom est passé en paramètres.
+	* Avant d'envoyer les données, plusieurs aspects sont vérifiés :
+	*		Fichier doit être lock par l'utilisateur
+	*		Le fichier existe coté utilisateur
+	*
+	* @param : String représentant le nom du fichier à convertir
+	* @return : void
+	*/
   private void push(String file_name)
 	{
     int state = 0;
@@ -380,6 +414,13 @@ public class Client {
     }
   }
 
+
+	/**
+	* Cette méthode permet de convertir un fichier en string afin de pouvoir l'envoyer sur le réseau.
+	*
+	* @param : String représentant le nom du fichier à convertir
+	* @return : String -> String du fichier
+	*/
   private String FileToString(String filePath)
 	{
     String result = "";
