@@ -254,9 +254,9 @@ public class Client {
 					System.out.println("Erreur: " + e.getMessage());
 				}
 			}
- 			if (response.equals("locked"))
+ 			if (response.contains("locked"))
  			{
- 				System.out.println("file already locked...\n");
+ 				System.out.println(response);
 
  			}
 			else if (response.equals("-2"))
@@ -298,41 +298,47 @@ public class Client {
 	{
 		try
 		{
-      File new_file = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
+			File new_file = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
 
-      if (!new_file.exists())
+			if (!new_file.exists())
 			{
-        new_file.createNewFile();
-        String file_content_buffer = ServerStub.get(file_name, "-1");
-        BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
-        file_writer.write(file_content_buffer);
-        file_writer.close();
-        System.out.println("File created successfully...\n");
-      }
-			else
-			{
-        String file_content_buffer = ServerStub.get(file_name, FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
-        if (file_content_buffer.equals("0"))
-				{
-          System.out.println("Error : File already up to date...\n");
-        }
-				else if (file_content_buffer.equals("-2"))
-				{
-          System.out.println("Error : File missing from server...\n");
-        }
+				String file_content_buffer = ServerStub.get(file_name, "-1");
+				if (!file_content_buffer.equals("-2")) {
+					new_file.createNewFile();
+					BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
+					file_writer.write(file_content_buffer);
+					file_writer.close();
+					System.out.println("File created successfully...\n");
+				}
 				else
 				{
-          BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
-          file_writer.write(file_content_buffer);
-          file_writer.close();
-          System.out.println("File updated successfully...\n");
-        }
-      }
-    }
+					System.out.println("Error : File missing from server...\n");
+				}
+			}
+			else
+			{
+				String file_content_buffer = ServerStub.get(file_name, FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
+				if (file_content_buffer.equals("0"))
+				{
+					System.out.println("Error : File already up to date...\n");
+				}
+				else if (file_content_buffer.equals("-2"))
+				{
+					System.out.println("Error : File missing from server...\n");
+				}
+				else
+				{
+					BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
+					file_writer.write(file_content_buffer);
+					file_writer.close();
+					System.out.println("File updated successfully...\n");
+				}
+			}
+		}
 		catch (IOException e)
 		{
-      System.out.println("Erreur: " + e.getMessage());
-    }
+			System.out.println("Erreur: " + e.getMessage());
+		}
 	}
 
 
@@ -381,7 +387,6 @@ public class Client {
     return checksum = sb.toString();
 	}
 
-
 	/**
 	* Cette méthode permet de convertir en String le fichier dont le nom est passé en paramètres.
 	* Avant d'envoyer les données, plusieurs aspects sont vérifiés :
@@ -393,26 +398,33 @@ public class Client {
 	*/
   private void push(String file_name)
 	{
-    int state = 0;
-    try
+		int state = 0;
+		try
 		{
-      if((new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name)).exists()) {
-        if ((state = ServerStub.push(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/" + file_name), this.id)) == 0 )
+			if((new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name)).exists()) {
+				if ((state = ServerStub.push(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/" + file_name), this.id)) == 0 )
 				{
-          System.out.println(file_name + " sent to the server...\n");
+					System.out.println(file_name + " sent to the server...\n");
 					System.out.println(file_name + " is now unlocked... \n");
-        }
-				else
+				}
+				else if ((state = ServerStub.push(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/" + file_name), this.id)) == -1)
 				{
-          System.out.println(file_name + " cannot be sent... \n...Please lock the file first\n");
-        }
-      }
-    }
+					System.out.println(file_name + " cannot be sent... \n...Please lock the file first\n");
+				}
+				else if ((state = ServerStub.push(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/" + file_name), this.id)) == 1) {
+					System.out.println(file_name + " already locked");
+				}
+			}
+			else
+			{
+				System.out.println(file_name + " does not exist localy");
+			}
+		}
 		catch (RemoteException e)
 		{
-      System.out.println("Erreur: " + e.getMessage());
-    }
-  }
+			System.out.println("Erreur: " + e.getMessage());
+		}
+	}
 
 
 	/**
