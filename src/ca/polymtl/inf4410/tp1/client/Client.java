@@ -334,7 +334,7 @@ public class Client {
 					BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
 					file_writer.write(file_content_buffer);
 					file_writer.close();
-					System.out.println("File created successfully...\n");
+					System.out.println("File synchronized...\n");
 				}
 				else
 				{

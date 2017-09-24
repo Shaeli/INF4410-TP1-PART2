@@ -224,7 +224,7 @@ public class Server implements ServerInterface {
 				}
 				else
 				{
-					return ("locked by Client " + hashm.get(file_name)); //Le fichier est verouillé 
+					return ("already locked by Client " + hashm.get(file_name)); //Le fichier est verouillé 
 				}
 			}
 			else{
