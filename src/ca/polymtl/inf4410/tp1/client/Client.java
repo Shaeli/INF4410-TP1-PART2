@@ -18,7 +18,6 @@ import java.nio.file.Paths;
 public class Client {
 	private int id;
 	private ServerInterface ServerStub = null;
-
 	public static void main(String[] args) {
 		String Hostname = "127.0.0.1";
 		String commande=null;
@@ -54,12 +53,12 @@ public class Client {
 
 		ServerStub = loadServerStub(Hostame);
 		File id_cli = new File("id.txt");
-		if (!id_cli.exists())
+		if (!id_cli.exists()) //Si le client ne possède pas deja un identifant, il faut en générer un et l'ecrire dans id.txt
 		{
 
             try
             {
-            	id=generateclientid();
+            	id=generateclientid(); //génération de son identifiant
 				id_cli.createNewFile();
 				FileWriter writer = new FileWriter(id_cli);
                 writer.write(Integer .toString(id));
@@ -69,7 +68,7 @@ public class Client {
             	System.err.println("Erreur: " + e.getMessage());
         	}
 		}
-		else
+		else //Le client possède deja un identfiant. Nous allons donc juste lire le fichier id.txt
 		{
 			try
 			{
@@ -97,20 +96,20 @@ public class Client {
      		case "list" :
      		 	list();
      		 	break;
-				case "syncLocalDir":
-					syncLocalDir();
-					break;
-        case "get":
-          get(fichier);
-          break;
-        case "push":
-          push(fichier);
-          break;
-			  case "lock":
-				  lock(fichier);
-				  break;
+			case "syncLocalDir":
+				syncLocalDir();
+				break;
+        	case "get":
+          		get(fichier);
+          		break;
+        	case "push":
+          		push(fichier);
+         		 break;
+			 case "lock":
+				lock(fichier);
+				break;
    			default :
-   				System.out.println("Commande non reconnue");
+   				System.out.println("Commande non reconnue"); 
    				break;
 
 		}
@@ -140,6 +139,13 @@ public class Client {
 		return stub;
 	}
 
+	/**
+	* Cette méthode créer un fichier sur le serveur et affiche un message d'information sur l'action effectuée (succès ou dans le cas d'un echec, la raison)
+	* 
+	*
+	* @param : String : nom du fichier a créer
+	* @return : Void
+	*/
 	private void create(String name)
 	{
 		if (name!= null)
@@ -156,6 +162,12 @@ public class Client {
 		}
 
 	}
+	/**
+	* Cette méthode liste les fichiers présent sur le serveur et leur nombre.
+	* 
+	* @param : Void
+	* @return : Void
+	*/
 
 	private void list()
 	{
@@ -170,6 +182,12 @@ public class Client {
 		}
 	}
 
+	/**
+	* Cette méthode génère un id unique pour le client.
+	* 
+	* @param : Void
+	* @return : int : id du client
+	*/
 	private int generateclientid()
 	{
 		int id=0;
@@ -212,7 +230,7 @@ public class Client {
 					file_writer.write(files.get(file_name));
 					file_writer.close();
 				}
-        System.out.println("Files created successfully...\n");
+        		System.out.println("Files created successfully...\n");
 			}
 			catch (IOException e)
 			{
@@ -225,14 +243,21 @@ public class Client {
 		}
 	}
 
-
+	/**
+	* Methode permetant de lock un fichier coté serveur.
+	* Si l'utilisateur ne possède pas le fichier, ou que celui ci diffère de la version coté serveur, le nouveau fichier sera teléchargé.
+	* Plusieurs cas d"erreures sont gérés, comme par exemple si le fichier n'existe pas coté serveur ou est deja verouillé. 
+	* Un message d"information affichera la réussite ou cause d'erreur lors du vérouillage du fichier.
+	* @param : String représentant le nom du fichier à lock
+	* @return : void
+	*/
 	private void lock (String file_name)
 	{
 		String response = "";
-		if (file_name!= null)
+		if (file_name!= null) 
 		{
 			File fichier = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
-			if (fichier.exists())
+			if (fichier.exists()) //si le fichier existe coté client
 			{
 				try
 				{
@@ -247,27 +272,27 @@ public class Client {
 			{
 				try
 				{
- 					response=ServerStub.lock(file_name,id,"-1");
+ 					response=ServerStub.lock(file_name,id,"-1"); 
 				}
 				catch (RemoteException e)
 				{
 					System.out.println("Erreur: " + e.getMessage());
 				}
 			}
- 			if (response.contains("locked"))
+ 			if (response.contains("locked")) //si le fichier est deja verouillé
  			{
  				System.out.println(response);
 
  			}
-			else if (response.equals("-2"))
+			else if (response.equals("-2")) //si le fichier n'existe pas sur le serveur
  			{
 				System.out.println("File doesn't exist on the server...\n");
  			}
-			else if (response.equals("0"))
+			else if (response.equals("0")) //le fichier etait identique coté client et serveur : il n'est pas telechargé et est bien verouillé
  			{
  				System.out.println("file locked successfully ...\n");
  			}
-			else
+			else //Le fichier est verouillé et doit etre telechargé (checksum différent coté client et serveur)
  			{
 				try
 				{
@@ -303,7 +328,8 @@ public class Client {
 			if (!new_file.exists())
 			{
 				String file_content_buffer = ServerStub.get(file_name, "-1");
-				if (!file_content_buffer.equals("-2")) {
+				if (!file_content_buffer.equals("-2")) 
+				{
 					new_file.createNewFile();
 					BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
 					file_writer.write(file_content_buffer);
@@ -353,38 +379,37 @@ public class Client {
 	{
 		int i = 0;
 		byte [] file_content_buffer = new byte[1024];
-    StringBuffer sb = new StringBuffer("");
-    String checksum = "";
-    try
+    	StringBuffer sb = new StringBuffer("");
+    	String checksum = "";
+   		try
 		{
-      MessageDigest md = MessageDigest.getInstance("SHA1");
-      FileInputStream file_reader = new FileInputStream(name);
+      		MessageDigest md = MessageDigest.getInstance("SHA1");
+      		FileInputStream file_reader = new FileInputStream(name);
 
-      while ((i=file_reader.read(file_content_buffer)) != -1)
+      		while ((i=file_reader.read(file_content_buffer)) != -1)
 			{
-        md.update(file_content_buffer, 0, i);
-      }
+       			md.update(file_content_buffer, 0, i);
+      		}
+      		byte[] mdbytes = md.digest();
 
-      byte[] mdbytes = md.digest();
-
-      for (int k = 0; k < mdbytes.length; k++)
+      		for (int k = 0; k < mdbytes.length; k++)
 			{
-        sb.append(Integer.toString((mdbytes[k] & 0xff) + 0x100, 16).substring(1));
-      }
-    }
+        		sb.append(Integer.toString((mdbytes[k] & 0xff) + 0x100, 16).substring(1));
+      		}
+    	}
 		catch (FileNotFoundException e)
 		{
-      System.out.println("Erreur: " + e.getMessage());
-    }
+      		System.out.println("Erreur: " + e.getMessage());
+    	}
 		catch (NoSuchAlgorithmException e)
 		{
-      System.out.println("Erreur: " + e.getMessage());
-    }
+      		System.out.println("Erreur: " + e.getMessage());
+    	}
 		catch (IOException e)
 		{
-      System.out.println("Erreur: " + e.getMessage());
-    }
-    return checksum = sb.toString();
+      		System.out.println("Erreur: " + e.getMessage());
+    	}
+    	return checksum = sb.toString();
 	}
 
 	/**
@@ -401,7 +426,8 @@ public class Client {
 		int state = 0;
 		try
 		{
-			if((new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name)).exists()) {
+			if((new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name)).exists()) 
+			{
 				if ((state = ServerStub.push(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/" + file_name), this.id)) == 0 )
 				{
 					System.out.println(file_name + " sent to the server...\n");
@@ -433,18 +459,18 @@ public class Client {
 	* @param : String représentant le nom du fichier à convertir
 	* @return : String -> String du fichier
 	*/
-  private String FileToString(String filePath)
+ 	private String FileToString(String filePath)
 	{
-    String result = "";
-    try
+    	String result = "";
+   		try
 		{
-        result = new String (Files.readAllBytes(Paths.get(filePath)));
-    }
+      		result = new String (Files.readAllBytes(Paths.get(filePath)));
+  		}
 		catch (IOException e)
 		{
-        System.out.println("Erreur: " + e.getMessage());
-    }
-    return result;
+   	    	System.out.println("Erreur: " + e.getMessage());
+  		}
+    	return result;
   }
 
 }

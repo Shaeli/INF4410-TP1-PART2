@@ -25,8 +25,8 @@ import ca.polymtl.inf4410.tp1.shared.ServerInterface;
 public class Server implements ServerInterface {
 
 	private int nb_client=0;
-	HashMap<String, String> hashm = new HashMap<String, String>();
-	private Object mutex_id=new Object();
+	HashMap<String, String> hashm = new HashMap<String, String>(); //hashmap contenant les fichiers et leur etat (vérouillé ou non)
+	private Object mutex_id=new Object(); //mutex empechant un conflit sur la generation d'id des utilisateurs
 	public static void main(String[] args) {
 		Server server = new Server();
 		server.run();
@@ -43,7 +43,6 @@ public class Server implements ServerInterface {
 
 		try {
 			ServerInterface stub = (ServerInterface) UnicastRemoteObject.exportObject(this, 0);
-
 			Registry registry = LocateRegistry.getRegistry();
 			registry.rebind("server", stub);
 			System.out.println("Server ready.");
@@ -54,19 +53,42 @@ public class Server implements ServerInterface {
 		} catch (Exception e) {
 			System.err.println("Erreur: " + e.getMessage());
 		}
+
+	////Si des fichiers sont présent avant le lancement du serveur, nous les ajouons a la liste////
+
+		File path = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"); 
+		String ls[] = path.list();
+		if (ls.length != 0 )
+		{
+			for(String fich : ls)
+			{
+				hashm.put(fich,"unlock");
+			}
+		}
+
+
 	}
+
+		/**
+		* 
+		* Cette méthode creer un fichier sur le serveur et retourne un message d'information de création ou d'erreur le cas échéant.
+		*	
+		*
+		* @param : String: nom du fichier
+		* @return String: message d'information sur la création
+		*/
 
 	public String create(String file_name) throws RemoteException
 	{
 		File new_file = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+file_name);
 		String chain;
-		if (!new_file.exists())
+		if (!new_file.exists()) //si le fichier n'existe pas
 		{
 			try
 			{
 				new_file.createNewFile();
 				chain=file_name+" created";
-				hashm.put(file_name,"unlock");
+				hashm.put(file_name,"unlock"); //rajout du fichier debloqué à la liste des fichiers 
 			}catch(IOException e)
 			{
 				System.err.println();
@@ -74,7 +96,7 @@ public class Server implements ServerInterface {
 				chain="Error during creation";
 			}
 		}
-		else
+		else //si le fichier existe
 		{
 			chain="Error: file already exists";
 		}
@@ -83,38 +105,54 @@ public class Server implements ServerInterface {
 		return chain;
 	}
 
+		/**
+		* 
+		* Cette méthode permet de lister les fichiers présents sur le serveur
+		*	
+		*
+		* @param : Void
+		* @return : String : chaine contenant la liste des fichiers présents et le nombre.
+		*/
+
 	public String list() throws RemoteException
 	{
 		int cpt = 0;
 		String result = "";
-		if (hashm.isEmpty())
+		if (hashm.isEmpty()) //Cas ou il n'y a pas de fichiers sur le serveur
 		{
 			return "0 files\n";
 
 		}
-		else
+		else 
 		{
 			Set set = hashm.entrySet();
 	      	Iterator it = set.iterator();
 	      	while(it.hasNext())
 	      	{
-	      		cpt++;
+	      		cpt++; //compte le nombre de fichiers présent
 	        	Map.Entry entry = (Map.Entry)it.next();
 	        	String file_name = (String)entry.getKey();
 	        	if(hashm.get(file_name).equals("unlock"))
 	        	{
-	        		result = result + "\n" + file_name + " : unlocked";
+	        		result = result + "\n" + file_name + " : unlocked"; //Le fichier n'est pas verouillé
 	        	}
 	        	else
 	        	{
-	        		result = result + "\n" + file_name + " : locked by Client " + hashm.get(file_name);
+	        		result = result + "\n" + file_name + " : locked by Client " + hashm.get(file_name); //Le fichier est verouillé
 	        	}
 	      	}
-	      	result=result+"\n"+cpt+" Files\n";
+	      	result=result+"\n"+cpt+" Files\n"; 
 	      	return result;
 		}
 
 	}
+		/**
+		* 
+		* Cette méthode permet de génerer un id unique au client.
+		*	
+		* @param : Void
+		* @return : int : id du client
+		*/
 
 	public int generateclientid() throws RemoteException
 	{
@@ -130,14 +168,14 @@ public class Server implements ServerInterface {
 		*	Coté serveur, vérification de l'existence du fichier.
 		*
 		* @param : Void
-		* @return : HashMap<String, String>
+		* @return : HashMap<String, String> contenant le nom du fichier et son contenu
 		*/
   	public HashMap<String, String> syncLocalDir() throws RemoteException
   	{
-    	HashMap<String, String> files = new HashMap<String, String>();
+    	HashMap<String, String> files = new HashMap<String, String>(); 
     	for (String file_name : hashm.keySet())
     	{
-      		files.put(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + file_name));
+      		files.put(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + file_name)); 
     	}
     	return files;
   	}
@@ -153,7 +191,7 @@ public class Server implements ServerInterface {
   	{
     	String result = "";
     	try
-			{
+		{
         	result = new String (Files.readAllBytes(Paths.get(filePath)));
     	}
     	catch (IOException e)
@@ -162,27 +200,35 @@ public class Server implements ServerInterface {
     	}
     	return result;
   	}
+  		/**
+		* Cette méthode vérifie que le fichier existe coté serveur. Si celui ci existe et qu'il n'est pas deja lock, alors, la méthode fera
+		* appel a la fonction 'get' qui récupérera le fichier (si nécéssaire (=si le checksum est différent ))
+		*
+		* @param : String représentant le nom du fichier à convertir.
+		* @param : id du client demandant l'opération
+		* @param : String représentant le checksum du fichier à convertir.
+		* @return : string contenant le fichier teléchargé ou un code erreur le cas échéant (ex : checksum deja identique)
+		*/
 
 	public String lock(String file_name, int clientid, String checksum) throws RemoteException
 	{
 
-			if(hashm.containsKey(file_name))
+			if(hashm.containsKey(file_name)) //Si le fichier existe
 			{
-				System.out.println("ok");
 				String unlocked = "unlock";
-				if(unlocked.equals(hashm.get(file_name)))
+				if(unlocked.equals(hashm.get(file_name))) //Si le fichier est déverouillé
 				{
-					hashm.put(file_name,Integer.toString(clientid));
-					return get(file_name,checksum);
+					hashm.put(file_name,Integer.toString(clientid)); 
+					return get(file_name,checksum); 
 
 				}
 				else
 				{
-					return ("locked by Client " + hashm.get(file_name));
+					return ("locked by Client " + hashm.get(file_name)); //Le fichier est verouillé 
 				}
 			}
 			else{
-				return "-2";
+				return "-2"; //Le fichier n'existe pas : renvoie du code erreur -2
 			}
 	}
 
@@ -230,37 +276,36 @@ public class Server implements ServerInterface {
 	{
 		int i = 0;
 		byte [] file_content_buffer = new byte[1024];
-    StringBuffer sb = new StringBuffer("");
-    String checksum = "";
-    try
+    	StringBuffer sb = new StringBuffer("");
+    	String checksum = "";
+    	try
 		{
-      MessageDigest md = MessageDigest.getInstance("SHA1");
-      FileInputStream file_reader = new FileInputStream(name);
-
-      while ((i=file_reader.read(file_content_buffer)) != -1)
+      		MessageDigest md = MessageDigest.getInstance("SHA1");
+      		FileInputStream file_reader = new FileInputStream(name);
+      		while ((i=file_reader.read(file_content_buffer)) != -1)
 			{
-        md.update(file_content_buffer, 0, i);
-      }
+       			md.update(file_content_buffer, 0, i);
+    		}
 
-      byte[] mdbytes = md.digest();
+     		byte[] mdbytes = md.digest();
 
-      for (int k = 0; k < mdbytes.length; k++)
+      		for (int k = 0; k < mdbytes.length; k++)
 			{
-        sb.append(Integer.toString((mdbytes[k] & 0xff) + 0x100, 16).substring(1));
-      }
-    }
+        		sb.append(Integer.toString((mdbytes[k] & 0xff) + 0x100, 16).substring(1));
+      		}
+    	}	
 		catch (FileNotFoundException e)
 		{
-      System.out.println("Erreur: " + e.getMessage());
-    }
+      		System.out.println("Erreur: " + e.getMessage());
+    	}
 		catch (NoSuchAlgorithmException e)
 		{
-      System.out.println("Erreur: " + e.getMessage());
-    }
+      		System.out.println("Erreur: " + e.getMessage());
+    	}
 		catch (IOException e)
 		{
-      System.out.println("Erreur: " + e.getMessage());
-    }
+     		System.out.println("Erreur: " + e.getMessage());
+   		}
     return checksum = sb.toString();
 	}
 
@@ -297,8 +342,8 @@ public class Server implements ServerInterface {
 				}
 				catch (IOException e)
 				{
-	        System.out.println("Erreur: " + e.getMessage());
-	      }
+	       		 	System.out.println("Erreur: " + e.getMessage());
+	      		}
 			}
 			else
 			{
