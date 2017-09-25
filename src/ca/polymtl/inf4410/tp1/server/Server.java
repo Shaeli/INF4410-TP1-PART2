@@ -56,7 +56,7 @@ public class Server implements ServerInterface {
 
 	////Si des fichiers sont présent avant le lancement du serveur, nous les ajouons a la liste////
 
-		File path = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"); 
+		File path = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/");
 		String ls[] = path.list();
 		if (ls.length != 0 )
 		{
@@ -70,9 +70,9 @@ public class Server implements ServerInterface {
 	}
 
 		/**
-		* 
+		*
 		* Cette méthode creer un fichier sur le serveur et retourne un message d'information de création ou d'erreur le cas échéant.
-		*	
+		*
 		*
 		* @param : String: nom du fichier
 		* @return String: message d'information sur la création
@@ -88,7 +88,7 @@ public class Server implements ServerInterface {
 			{
 				new_file.createNewFile();
 				chain=file_name+" created";
-				hashm.put(file_name,"unlock"); //rajout du fichier debloqué à la liste des fichiers 
+				hashm.put(file_name,"unlock"); //rajout du fichier debloqué à la liste des fichiers
 			}catch(IOException e)
 			{
 				System.err.println();
@@ -106,9 +106,9 @@ public class Server implements ServerInterface {
 	}
 
 		/**
-		* 
+		*
 		* Cette méthode permet de lister les fichiers présents sur le serveur
-		*	
+		*
 		*
 		* @param : Void
 		* @return : String : chaine contenant la liste des fichiers présents et le nombre.
@@ -123,7 +123,7 @@ public class Server implements ServerInterface {
 			return "0 files\n";
 
 		}
-		else 
+		else
 		{
 			Set set = hashm.entrySet();
 	      	Iterator it = set.iterator();
@@ -141,15 +141,15 @@ public class Server implements ServerInterface {
 	        		result = result + "\n" + file_name + " : locked by Client " + hashm.get(file_name); //Le fichier est verouillé
 	        	}
 	      	}
-	      	result=result+"\n"+cpt+" Files\n"; 
+	      	result=result+"\n"+cpt+" Files\n";
 	      	return result;
 		}
 
 	}
 		/**
-		* 
+		*
 		* Cette méthode permet de génerer un id unique au client.
-		*	
+		*
 		* @param : Void
 		* @return : int : id du client
 		*/
@@ -172,10 +172,10 @@ public class Server implements ServerInterface {
 		*/
   	public HashMap<String, String> syncLocalDir() throws RemoteException
   	{
-    	HashMap<String, String> files = new HashMap<String, String>(); 
+    	HashMap<String, String> files = new HashMap<String, String>();
     	for (String file_name : hashm.keySet())
     	{
-      		files.put(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + file_name)); 
+      		files.put(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + file_name));
     	}
     	return files;
   	}
@@ -218,13 +218,13 @@ public class Server implements ServerInterface {
 				String unlocked = "unlock";
 				if(unlocked.equals(hashm.get(file_name))) //Si le fichier est déverouillé
 				{
-					hashm.put(file_name,Integer.toString(clientid)); 
-					return get(file_name,checksum); 
+					hashm.put(file_name,Integer.toString(clientid));
+					return get(file_name,checksum);
 
 				}
 				else
 				{
-					return ("already locked by Client " + hashm.get(file_name)); //Le fichier est verouillé 
+					return ("already locked by Client " + hashm.get(file_name)); //Le fichier est verouillé
 				}
 			}
 			else{
@@ -247,17 +247,17 @@ public class Server implements ServerInterface {
 		File f1 = new File("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
 		if (!f1.exists())
 		{
-			file_content_buffer = "-2";
+			file_content_buffer = "-2"; //Fichier n'existe pas coté serveur
 		}
 		else if (checksum.equals(FileToChecksum("./src/ca/polymtl/inf4410/tp1/server/server_stockage/" + name)))
 		{
-			file_content_buffer = "0";
+			file_content_buffer = "0"; //Client possède déja un fichier à jours
 		}
-		else if (checksum.equals("-1"))
+		else if (checksum.equals("-1")) //CLient force le serveur à lui envoyer le fichier car il ne le possède pas
 		{
 			file_content_buffer = FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
 		}
-		else
+		else //Envoie normal du fichier
 		{
 			file_content_buffer = FileToString("./src/ca/polymtl/inf4410/tp1/server/server_stockage/"+name);
 		}
@@ -291,9 +291,9 @@ public class Server implements ServerInterface {
 
       		for (int k = 0; k < mdbytes.length; k++)
 			{
-        		sb.append(Integer.toString((mdbytes[k] & 0xff) + 0x100, 16).substring(1));
+        		sb.append(Integer.toString((mdbytes[k] & 0xff) + 0x100, 16).substring(1)); //Calcul du checksum
       		}
-    	}	
+    	}
 		catch (FileNotFoundException e)
 		{
       		System.out.println("Erreur: " + e.getMessage());

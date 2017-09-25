@@ -109,7 +109,7 @@ public class Client {
 				lock(fichier);
 				break;
    			default :
-   				System.out.println("Commande non reconnue"); 
+   				System.out.println("Commande non reconnue");
    				break;
 
 		}
@@ -141,7 +141,7 @@ public class Client {
 
 	/**
 	* Cette méthode créer un fichier sur le serveur et affiche un message d'information sur l'action effectuée (succès ou dans le cas d'un echec, la raison)
-	* 
+	*
 	*
 	* @param : String : nom du fichier a créer
 	* @return : Void
@@ -164,7 +164,7 @@ public class Client {
 	}
 	/**
 	* Cette méthode liste les fichiers présent sur le serveur et leur nombre.
-	* 
+	*
 	* @param : Void
 	* @return : Void
 	*/
@@ -184,7 +184,7 @@ public class Client {
 
 	/**
 	* Cette méthode génère un id unique pour le client.
-	* 
+	*
 	* @param : Void
 	* @return : int : id du client
 	*/
@@ -246,15 +246,16 @@ public class Client {
 	/**
 	* Methode permetant de lock un fichier coté serveur.
 	* Si l'utilisateur ne possède pas le fichier, ou que celui ci diffère de la version coté serveur, le nouveau fichier sera teléchargé.
-	* Plusieurs cas d"erreures sont gérés, comme par exemple si le fichier n'existe pas coté serveur ou est deja verouillé. 
+	* Plusieurs cas d"erreures sont gérés, comme par exemple si le fichier n'existe pas coté serveur ou est deja verouillé.
 	* Un message d"information affichera la réussite ou cause d'erreur lors du vérouillage du fichier.
+	*
 	* @param : String représentant le nom du fichier à lock
 	* @return : void
 	*/
 	private void lock (String file_name)
 	{
 		String response = "";
-		if (file_name!= null) 
+		if (file_name!= null)
 		{
 			File fichier = new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name);
 			if (fichier.exists()) //si le fichier existe coté client
@@ -272,7 +273,7 @@ public class Client {
 			{
 				try
 				{
- 					response=ServerStub.lock(file_name,id,"-1"); 
+ 					response=ServerStub.lock(file_name,id,"-1");
 				}
 				catch (RemoteException e)
 				{
@@ -328,7 +329,7 @@ public class Client {
 			if (!new_file.exists())
 			{
 				String file_content_buffer = ServerStub.get(file_name, "-1");
-				if (!file_content_buffer.equals("-2")) 
+				if (!file_content_buffer.equals("-2"))  // Si le fichier existe coté serveur
 				{
 					new_file.createNewFile();
 					BufferedWriter file_writer = new BufferedWriter(new FileWriter(new_file));
@@ -344,11 +345,11 @@ public class Client {
 			else
 			{
 				String file_content_buffer = ServerStub.get(file_name, FileToChecksum("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name));
-				if (file_content_buffer.equals("0"))
+				if (file_content_buffer.equals("0")) //Le fichier est déja à jours
 				{
 					System.out.println("Error : File already up to date...\n");
 				}
-				else if (file_content_buffer.equals("-2"))
+				else if (file_content_buffer.equals("-2")) // Fichier n'existe pas coté serveur
 				{
 					System.out.println("Error : File missing from server...\n");
 				}
@@ -426,7 +427,7 @@ public class Client {
 		int state = 0;
 		try
 		{
-			if((new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name)).exists()) 
+			if((new File("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/"+file_name)).exists())
 			{
 				if ((state = ServerStub.push(file_name, FileToString("./src/ca/polymtl/inf4410/tp1/client/Client_Storage/" + file_name), this.id)) == 0 )
 				{
